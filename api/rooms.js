@@ -15,20 +15,26 @@ module.exports = async (req, res) => {
     
     // แปลง CSV เป็น Array และจัดการกับข้อมูล
     const rows = text.split('\n').map(row => {
-      const cells = row.split(',').map(cell => cell.trim().replace(/^"(.*)"$/, '$1'));
-      return {
-        roomNumber: cells[0],
-        price: cells[1],
-        status: cells[2],
-        imageUrl: cells[3],
-        size: cells[4],
-        amenities: cells[5],
-        rentalStart: cells[6],
-        rentalEnd: cells[7],
-        latitude: cells[8],
-        longitude: cells[9]
-      };
-    });
+      // ใช้ regular expression เพื่อแยกฟิลด์ โดยคำนึงถึง comma ใน quotes
+      const cells = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+      if (cells) {
+        // ลบ quotes ที่ไม่จำเป็นและ trim whitespace
+        const cleanCells = cells.map(cell => cell.replace(/^"|"$/g, '').trim());
+        return {
+          roomNumber: cleanCells[0],
+          price: cleanCells[1],
+          status: cleanCells[2],
+          imageUrl: cleanCells[3].split(',').map(url => url.trim()), // แยก URL เป็น array
+          size: cleanCells[4],
+          amenities: cleanCells[5],
+          rentalStart: cleanCells[6],
+          rentalEnd: cleanCells[7],
+          latitude: cleanCells[8],
+          longitude: cleanCells[9]
+        };
+      }
+      return null;
+    }).filter(row => row !== null);
 
     res.status(200).json(rows);
   } catch (error) {
