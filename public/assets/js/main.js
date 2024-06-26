@@ -9,9 +9,6 @@ function fetchRooms() {
         .then(response => response.json())
         .then(data => {
             console.log("Fetched data:", data);
-            if (data.error) {
-                throw new Error(data.error);
-            }
             roomsData = data.map(row => ({c: row.map(cell => ({v: cell}))}));
             displayRooms(roomsData);
         })
