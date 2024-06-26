@@ -1,11 +1,13 @@
 {
   "name": "sandy-rental",
   "version": "1.0.0",
-  "description": "Rental room system",
-  "main": "index.js",
-  "scripts": {
-    "start": "vercel dev"
+  "engines": {
+    "node": "14.x"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "scripts": {
+    "start": "node api/index.js"
+  },
+  "dependencies": {
+    // dependencies ที่คุณอาจมี
+  }
 }
