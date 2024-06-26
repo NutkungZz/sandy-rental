@@ -1,12 +1,12 @@
 {
   "name": "sandy-rental",
   "version": "1.0.0",
-  "private": true,
+  "description": "Rental room system",
+  "main": "index.js",
   "scripts": {
     "start": "node api/index.js"
   },
-    "dependencies": {
+  "dependencies": {
     "node-fetch": "^2.6.1"
-  }
   }
 }
