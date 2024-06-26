@@ -8,6 +8,6 @@
     "start": "node api/index.js"
   },
   "dependencies": {
-    // dependencies ที่คุณอาจมี
+    "express": "^4.17.1"
   }
 }
