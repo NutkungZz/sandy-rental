@@ -7,10 +7,13 @@ module.exports = async (req, res) => {
   try {
     const response = await fetch(sheetUrl);
     const text = await response.text();
-    const data = JSON.parse(text.substr(47).slice(0, -2));
     
-    if (data.table && data.table.rows) {
-      const formattedData = data.table.rows.map(row => 
+    // ตรวจสอบว่าข้อความเริ่มต้นด้วย "/*O_o*/" หรือไม่
+    const jsonText = text.startsWith("/*O_o*/") ? text.substr(6) : text;
+    const jsonData = JSON.parse(jsonText);
+    
+    if (jsonData.table && jsonData.table.rows) {
+      const formattedData = jsonData.table.rows.map(row => 
         row.c.map(cell => cell ? cell.v : null)
       );
       res.status(200).json(formattedData);
@@ -19,6 +22,6 @@ module.exports = async (req, res) => {
     }
   } catch (error) {
     console.error('Error:', error);
-    res.status(500).json({ error: 'Failed to fetch rooms' });
+    res.status(500).json({ error: 'Failed to fetch rooms: ' + error.message });
   }
 };
