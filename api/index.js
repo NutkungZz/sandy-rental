@@ -1,9 +1,11 @@
-const express = require('express');
-const app = express();
-
-app.get('/api/rooms', require('./rooms'));
-app.get('/api/test', (req, res) => {
-  res.json({ message: "API is working!" });
-});
-
-module.exports = app;
+module.exports = (req, res) => {
+  const { pathname } = new URL(req.url, `https://${req.headers.host}`);
+  
+  if (pathname === '/api/rooms') {
+    require('./rooms')(req, res);
+  } else if (pathname === '/api/test') {
+    res.json({ message: "API is working!" });
+  } else {
+    res.status(404).json({ error: "Not Found" });
+  }
+};
