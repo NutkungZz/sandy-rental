@@ -6,7 +6,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function fetchRooms() {
     fetch('/api/rooms')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             console.log("Fetched data:", data);
             roomsData = data.map(row => ({c: row.map(cell => ({v: cell}))}));
