@@ -164,9 +164,10 @@ document.getElementById('maxPrice').addEventListener('input', () => {
     window.filterTimeout = setTimeout(filterRooms, 300);
 });
 
+// แก้ไขส่วน login ใน main.js
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const username = document.getElementById('username').value;
+    const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     
     fetch('/api/login', {
@@ -174,14 +175,15 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+            localStorage.setItem('user', JSON.stringify(data.user));
             window.location.href = 'admin.html';
         } else {
-            alert(data.message || 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
+            alert(data.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
         }
     })
     .catch(error => {
