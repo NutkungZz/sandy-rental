@@ -19,6 +19,7 @@ module.exports = async (req, res) => {
     }
 
     const rows = text.split('\n').map((row, index) => {
+      // ใช้ regular expression เพื่อแยกเซลล์ที่มีเครื่องหมาย , อยู่ในเครื่องหมายคำพูด
       const cells = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
       cells.forEach((cell, i) => cells[i] = cell.replace(/^"|"$/g, '').trim());
       
@@ -29,7 +30,7 @@ module.exports = async (req, res) => {
           roomNumber: cells[0] || '',
           price: cells[1] || '',
           status: cells[2] || '',
-          images: (cells[3] || '').split('||').filter(url => url.trim() !== ''),
+          images: cells[3].split('|||').map(url => url.trim()).filter(url => url !== ''),
           size: cells[4] || '',
           amenities: (cells[5] || '').split(';').filter(item => item.trim() !== ''),
           rentalStart: cells[6] || '',
