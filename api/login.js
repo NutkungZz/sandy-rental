@@ -1,13 +1,22 @@
+const { createClient } = require('@supabase/supabase-js');
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 module.exports = async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  // กำหนดค่า username และ password แบบ fixed
-  const validUsername = 'admin';
-  const validPassword = 'password123';
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
+    });
 
-  if (username === validUsername && password === validPassword) {
-    res.json({ success: true });
-  } else {
-    res.status(401).json({ success: false, message: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
+    if (error) throw error;
+
+    res.json({ success: true, user: data.user });
+  } catch (error) {
+    res.status(401).json({ success: false, message: error.message });
   }
 };
