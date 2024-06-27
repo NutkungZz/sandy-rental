@@ -1,20 +1,19 @@
-module.exports = async (req, res) => {
-  const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/NutkungZz/sandy-rental/main/db.json';
+import { createClient } from '@supabase/supabase-js'
 
+const supabaseUrl = 'YOUR_SUPABASE_URL'
+const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'
+const supabase = createClient(supabaseUrl, supabaseKey)
+
+export default async function handler(req, res) {
   try {
-    const response = await fetch(GITHUB_RAW_URL);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
+    const { data, error } = await supabase
+      .from('rooms')
+      .select('*')
     
-    if (!data.rooms || data.rooms.length === 0) {
-      throw new Error('No rooms data found');
-    }
+    if (error) throw error
 
-    res.status(200).json(data.rooms);
+    res.status(200).json(data)
   } catch (error) {
-    console.error('Error in /api/rooms:', error);
-    res.status(500).json({ error: 'Failed to fetch rooms', details: error.message });
+    res.status(500).json({ error: error.message })
   }
-};
+}
