@@ -179,3 +179,30 @@ function handleLogin(e) {
         alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
     });
 }
+
+function handleRegister(e) {
+  e.preventDefault();
+  const email = document.getElementById('registerEmail').value;
+  const password = document.getElementById('registerPassword').value;
+
+  fetch('/api/register', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, password }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('ลงทะเบียนสำเร็จ');
+      // ทำการ login อัตโนมัติหรือนำผู้ใช้ไปยังหน้า login
+    } else {
+      alert(data.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('เกิดข้อผิดพลาดในการลงทะเบียน');
+  });
+}
