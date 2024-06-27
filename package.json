@@ -7,7 +7,6 @@
     "start": "node api/index.js"
   },
   "dependencies": {
-  "@supabase/supabase-js": "^2.x.x"
-  },
-  "engines": { "node": "20.x" }
+    "@supabase/supabase-js": "^2.x.x"
+  }  
 }
