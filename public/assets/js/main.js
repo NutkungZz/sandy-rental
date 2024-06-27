@@ -3,6 +3,13 @@ let isProcessing = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchRooms();
+    
+    document.getElementById('searchInput').addEventListener('input', filterRooms);
+    document.getElementById('statusFilter').addEventListener('change', filterRooms);
+    document.getElementById('minPrice').addEventListener('input', filterRooms);
+    document.getElementById('maxPrice').addEventListener('input', filterRooms);
+    
+    document.getElementById('loginForm').addEventListener('submit', handleLogin);
 });
 
 function fetchRooms() {
@@ -15,12 +22,8 @@ function fetchRooms() {
         })
         .then(data => {
             console.log("Fetched data:", data);
-            if (Array.isArray(data)) {
-                roomsData = data;
-                displayRooms(roomsData);
-            } else {
-                throw new Error('Invalid data format');
-            }
+            roomsData = data;
+            displayRooms(roomsData);
         })
         .catch(error => {
             console.error('Error:', error);
@@ -150,22 +153,7 @@ function showError(message) {
     roomList.innerHTML = `<div class="alert alert-danger" role="alert">${message}</div>`;
 }
 
-document.getElementById('searchInput').addEventListener('input', () => {
-    clearTimeout(window.filterTimeout);
-    window.filterTimeout = setTimeout(filterRooms, 300);
-});
-document.getElementById('statusFilter').addEventListener('change', filterRooms);
-document.getElementById('minPrice').addEventListener('input', () => {
-    clearTimeout(window.filterTimeout);
-    window.filterTimeout = setTimeout(filterRooms, 300);
-});
-document.getElementById('maxPrice').addEventListener('input', () => {
-    clearTimeout(window.filterTimeout);
-    window.filterTimeout = setTimeout(filterRooms, 300);
-});
-
-// แก้ไขส่วน login ใน main.js
-document.getElementById('loginForm').addEventListener('submit', function(e) {
+function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -190,4 +178,4 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
         console.error('Error:', error);
         alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
     });
-});
+}
