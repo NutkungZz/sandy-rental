@@ -13,16 +13,21 @@ module.exports = async (req, res) => {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     const text = await response.text();
-    console.log('Received data:', text.substring(0, 200) + '...'); // Log first 200 characters
+    console.log('Received data:', text);
 
     if (!text.trim()) {
       throw new Error('Received empty response from Google Sheets');
     }
 
     const rows = text.split('\n').map((row, index) => {
-      console.log(`Processing row ${index + 1}:`, row);
-      const cells = row.split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
-      if (cells.length >= 10) {
+      console.log(`Raw row ${index + 1}:`, row);
+      // Remove quotes and split by comma, but keep commas within quotes
+      const cells = row.match(/(".*?"|[^",]+)(?=\s*,|\s*$)/g) || [];
+      cells.forEach((cell, i) => cells[i] = cell.replace(/^"|"$/g, '').trim());
+      
+      console.log(`Processed cells for row ${index + 1}:`, cells);
+
+      if (cells.length >= 4) {  // Изменим условие на минимум 4 ячейки
         return {
           roomNumber: cells[0] || '',
           price: cells[1] || '',
