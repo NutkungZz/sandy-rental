@@ -14,7 +14,7 @@ function fetchRooms() {
         })
         .then(data => {
             console.log("Fetched data:", data);
-            roomsData = data.map(row => ({c: row.map(cell => ({v: cell}))}));
+            roomsData = data;
             displayRooms(roomsData);
         })
         .catch(error => {
@@ -33,7 +33,7 @@ function displayRooms(rooms) {
         room.images.forEach((image, i) => {
             carouselItems += `
                 <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                    <img src="${image}" class="d-block w-100" alt="Room ${room.roomNumber} Image ${i+1}">
+                    <img src="${image}" class="d-block w-100" alt="Room ${room.room_number} Image ${i+1}">
                 </div>
             `;
             carouselIndicators += `
@@ -62,11 +62,11 @@ function displayRooms(rooms) {
                         </button>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">ห้อง ${room.roomNumber}</h5>
+                        <h5 class="card-title">${room.room_number}</h5>
                         <p class="card-text ${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">
                             สถานะ: ${room.status}
                         </p>
-                        <p class="price">฿${room.price} / เดือน</p>
+                        <p class="price">฿${room.price.toLocaleString()} / เดือน</p>
                     </div>
                     <div class="card-footer">
                         <button class="btn btn-primary btn-sm" onclick="showRoomDetails(${index})">ดูรายละเอียด</button>
@@ -80,72 +80,51 @@ function displayRooms(rooms) {
     filterRooms();
 }
 
+function showRoomDetails(index) {
+    const room = roomsData[index];
+    const amenitiesList = room.amenities.join(', ');
+
+    const detailContent = `
+        <h4 class="mb-3">${room.room_number}</h4>
+        <p><strong>ราคา:</strong> ฿${room.price.toLocaleString()} / เดือน</p>
+        <p><strong>สถานะ:</strong> <span class="${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">${room.status}</span></p>
+        <p><strong>ขนาดห้อง:</strong> ${room.size}</p>
+        <p><strong>สิ่งอำนวยความสะดวก:</strong> ${amenitiesList}</p>
+        <p><strong>รายละเอียด:</strong> ${room.description}</p>
+        <h5 class="mt-4 mb-2">ประวัติการเช่า</h5>
+        <ul class="list-unstyled">
+            <li><strong>วันที่เริ่มต้น:</strong> ${formatDate(room.rental_start)}</li>
+            <li><strong>วันที่สิ้นสุด:</strong> ${formatDate(room.rental_end)}</li>
+        </ul>
+        <p><a href="https://www.google.com/maps?q=${room.latitude},${room.longitude}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-map-marker-alt"></i> ดูตำแหน่งบน Google Maps</a></p>
+    `;
+
+    document.getElementById('roomDetailContent').innerHTML = detailContent;
+    new bootstrap.Modal(document.getElementById('roomDetailModal')).show();
+}
+
+function formatDate(dateString) {
+    if (!dateString || dateString === '9999-12-31') return 'ไม่ระบุ';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
+}
+
 function filterRooms() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
     const minPrice = document.getElementById('minPrice').value;
     const maxPrice = document.getElementById('maxPrice').value;
 
-    const roomCards = document.querySelectorAll('.room-card');
+    const filteredRooms = roomsData.filter(room => {
+        const matchesSearch = room.room_number.toLowerCase().includes(searchTerm);
+        const matchesStatus = statusFilter === '' || room.status.toLowerCase() === statusFilter;
+        const matchesPrice = (minPrice === '' || room.price >= parseInt(minPrice)) && 
+                             (maxPrice === '' || room.price <= parseInt(maxPrice));
 
-    roomCards.forEach(card => {
-        const roomNumber = card.querySelector('.card-title').textContent.toLowerCase();
-        const status = card.querySelector('.card-text').textContent.toLowerCase();
-        const price = parseInt(card.querySelector('.price').textContent.replace(/[^0-9]/g, ''));
-
-        const matchesSearch = roomNumber.includes(searchTerm);
-        const matchesStatus = statusFilter === '' || status.includes(statusFilter);
-        const matchesPrice = (minPrice === '' || price >= parseInt(minPrice)) && 
-                             (maxPrice === '' || price <= parseInt(maxPrice));
-
-        if (matchesSearch && matchesStatus && matchesPrice) {
-            card.parentElement.style.display = '';
-        } else {
-            card.parentElement.style.display = 'none';
-        }
+        return matchesSearch && matchesStatus && matchesPrice;
     });
-}
 
-function formatDate(dateString) {
-    if (!dateString || dateString === 'ไม่ระบุ') return 'ไม่ระบุ';
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
-}
-
-function showRoomDetails(index) {
-    const room = roomsData[index];
-    const roomNumber = room.c[0] && room.c[0].v ? room.c[0].v : 'ไม่ระบุ';
-    const price = room.c[1] && room.c[1].v ? room.c[1].v : 'ไม่ระบุ';
-    const status = room.c[2] && room.c[2].v ? room.c[2].v : 'ไม่ระบุ';
-    const roomSize = room.c[4] && room.c[4].v ? room.c[4].v : 'ไม่ระบุ';
-    const amenities = room.c[5] && room.c[5].v ? room.c[5].v : 'ไม่ระบุ';
-    const rentalStart = formatDate(room.c[6] && room.c[6].v ? room.c[6].v : 'ไม่ระบุ');
-    const rentalEnd = formatDate(room.c[7] && room.c[7].v ? room.c[7].v : 'ไม่ระบุ');
-    const latitude = room.c[8] && room.c[8].v ? room.c[8].v : null;
-    const longitude = room.c[9] && room.c[9].v ? room.c[9].v : null;
-
-    const statusClass = status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied';
-
-    const locationLink = latitude && longitude 
-        ? `<p><a href="https://www.google.com/maps?q=${latitude},${longitude}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-map-marker-alt"></i> ดูตำแหน่งบน Google Maps</a></p>`
-        : '';
-
-    const detailContent = `
-        <h4 class="mb-3">ห้อง ${roomNumber}</h4>
-        <p><strong>ราคา:</strong> ฿${typeof price === 'number' ? price.toLocaleString() : price} / เดือน</p>
-        <p><strong>สถานะ:</strong> <span class="${statusClass}">${status}</span></p>
-        <p><strong>ขนาดห้อง:</strong> ${roomSize}</p>
-        <p><strong>สิ่งอำนวยความสะดวก:</strong> ${amenities}</p>
-        <h5 class="mt-4 mb-2">ประวัติการเช่า</h5>
-        <ul class="list-unstyled">
-            <li><strong>วันที่เริ่มต้น:</strong> ${rentalStart}</li>
-            <li><strong>วันที่สิ้นสุด:</strong> ${rentalEnd}</li>
-        </ul>
-        ${locationLink}
-    `;
-
-    document.getElementById('roomDetailContent').innerHTML = detailContent;
-    new bootstrap.Modal(document.getElementById('roomDetailModal')).show();
+    displayRooms(filteredRooms);
 }
 
 function showError(message) {
