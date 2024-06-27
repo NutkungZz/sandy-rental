@@ -9,4 +9,5 @@
   "dependencies": {
   "@supabase/supabase-js": "^2.x.x"
   }
+  "engines": { "node": "20.x" }
 }
