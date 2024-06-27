@@ -14,21 +14,20 @@ module.exports = async (req, res) => {
     const text = await response.text();
     
     const rows = text.split('\n').map(row => {
-      const cells = row.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-      if (cells) {
-        const cleanCells = cells.map(cell => cell.replace(/^"|"$/g, '').trim());
+      const cells = row.split(',').map(cell => cell.trim().replace(/^"|"$/g, ''));
+      if (cells.length >= 10) {
         return {
-          roomNumber: cleanCells[0],
-          price: cleanCells[1],
-          status: cleanCells[2],
-          images: cleanCells[3].split(';').map(url => url.trim()),
-          size: cleanCells[4],
-          amenities: cleanCells[5].split(';').map(item => item.trim()),
-          rentalStart: cleanCells[6],
-          rentalEnd: cleanCells[7],
-          latitude: cleanCells[8],
-          longitude: cleanCells[9],
-          description: cleanCells[10]
+          roomNumber: cells[0] || '',
+          price: cells[1] || '',
+          status: cells[2] || '',
+          images: (cells[3] || '').split(';').filter(url => url.trim() !== ''),
+          size: cells[4] || '',
+          amenities: (cells[5] || '').split(';').filter(item => item.trim() !== ''),
+          rentalStart: cells[6] || '',
+          rentalEnd: cells[7] || '',
+          latitude: cells[8] || '',
+          longitude: cells[9] || '',
+          description: cells[10] || ''
         };
       }
       return null;
