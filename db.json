@@ -2,7 +2,7 @@
   "rooms": [
     {
       "id": 1,
-      "roomNumber": "ห้อง 1 ตึก E ชั้น 2",
+      "roomNumber": "พลัมเฟส 2 ตึก E ชั้น 5",
       "price": 6000,
       "status": "มีผู้เช่า",
       "images": [
@@ -28,7 +28,7 @@
     },
     {
       "id": 2,
-      "roomNumber": "ห้อง 2 ตึก C ชั้น 3",
+      "roomNumber": "พลัมเฟส 2 ตึก E ชั้น 5",
       "price": 6500,
       "status": "ว่าง",
       "images": [
