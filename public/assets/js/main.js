@@ -28,39 +28,19 @@ function displayRooms(rooms) {
     roomList.innerHTML = '';
     
     rooms.forEach((room, index) => {
-        const roomNumber = room.c[0] && room.c[0].v ? room.c[0].v : 'ไม่ระบุ';
-        const price = room.c[1] && room.c[1].v ? room.c[1].v : 'ไม่ระบุ';
-        const status = room.c[2] && room.c[2].v ? room.c[2].v : 'ไม่ระบุ';
-        const imageUrls = room.c[3] && room.c[3].v ? room.c[3].v.split(',').map(url => url.trim()) : [];
-        const latitude = room.c[8] && room.c[8].v ? room.c[8].v : null;
-        const longitude = room.c[9] && room.c[9].v ? room.c[9].v : null;
-
-        const statusClass = status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied';
-
         let carouselItems = '';
         let carouselIndicators = '';
-        if (imageUrls.length > 0) {
-            imageUrls.forEach((url, i) => {
-                carouselItems += `
-                    <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                        <img src="${url}" class="d-block w-100 room-image" alt="Room ${roomNumber} Image ${i+1}" onerror="this.onerror=null; this.src='https://via.placeholder.com/300x200?text=Image+Not+Found';">
-                    </div>
-                `;
-                carouselIndicators += `
-                    <button type="button" data-bs-target="#carousel${index}" data-bs-slide-to="${i}" ${i === 0 ? 'class="active" aria-current="true"' : ''} aria-label="Slide ${i+1}"></button>
-                `;
-            });
-        } else {
-            carouselItems = `
-                <div class="carousel-item active">
-                    <img src="https://via.placeholder.com/300x200?text=No+Image" class="d-block w-100 room-image" alt="No Image Available">
+        room.images.forEach((image, i) => {
+            carouselItems += `
+                <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                    <img src="${image}" class="d-block w-100" alt="Room ${room.roomNumber} Image ${i+1}">
                 </div>
             `;
-        }
-
-        const locationLink = latitude && longitude 
-            ? `<a href="https://www.google.com/maps?q=${latitude},${longitude}" target="_blank" class="location-link"><i class="fas fa-map-marker-alt"></i> ดูแผนที่</a>`
-            : '';
+            carouselIndicators += `
+                <button type="button" data-bs-target="#carousel${index}" data-bs-slide-to="${i}" 
+                    ${i === 0 ? 'class="active" aria-current="true"' : ''} aria-label="Slide ${i+1}"></button>
+            `;
+        });
 
         const roomCard = `
             <div class="col-lg-4 col-md-6 mb-4">
@@ -72,15 +52,24 @@ function displayRooms(rooms) {
                         <div class="carousel-inner">
                             ${carouselItems}
                         </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel${index}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carousel${index}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">ห้อง ${roomNumber}</h5>
-                        <p class="card-text ${statusClass}">สถานะ: ${status}</p>
-                        <p class="price">฿${typeof price === 'number' ? price.toLocaleString() : price} / เดือน</p>
+                        <h5 class="card-title">ห้อง ${room.roomNumber}</h5>
+                        <p class="card-text ${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">
+                            สถานะ: ${room.status}
+                        </p>
+                        <p class="price">฿${room.price} / เดือน</p>
                     </div>
-                    <div class="card-footer clearfix">
-                        <button class="btn btn-primary btn-sm btn-details" onclick="showRoomDetails(${index})">ดูรายละเอียด</button>
-                        ${locationLink}
+                    <div class="card-footer">
+                        <button class="btn btn-primary btn-sm" onclick="showRoomDetails(${index})">ดูรายละเอียด</button>
                     </div>
                 </div>
             </div>
