@@ -1,4 +1,5 @@
 let roomsData = [];
+let isProcessing = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchRooms();
@@ -14,8 +15,12 @@ function fetchRooms() {
         })
         .then(data => {
             console.log("Fetched data:", data);
-            roomsData = data;
-            displayRooms(roomsData);
+            if (Array.isArray(data)) {
+                roomsData = data;
+                displayRooms(roomsData);
+            } else {
+                throw new Error('Invalid data format');
+            }
         })
         .catch(error => {
             console.error('Error:', error);
@@ -27,6 +32,11 @@ function displayRooms(rooms) {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = '';
     
+    if (rooms.length === 0) {
+        roomList.innerHTML = '<p>ไม่พบข้อมูลห้องพัก</p>';
+        return;
+    }
+
     rooms.forEach((room, index) => {
         let carouselItems = '';
         let carouselIndicators = '';
@@ -76,8 +86,34 @@ function displayRooms(rooms) {
         `;
         roomList.innerHTML += roomCard;
     });
+}
 
-    filterRooms();
+function filterRooms() {
+    if (isProcessing) return;
+    isProcessing = true;
+
+    try {
+        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+        const minPrice = document.getElementById('minPrice').value;
+        const maxPrice = document.getElementById('maxPrice').value;
+
+        const filteredRooms = roomsData.filter(room => {
+            const matchesSearch = room.room_number.toLowerCase().includes(searchTerm);
+            const matchesStatus = statusFilter === '' || room.status.toLowerCase() === statusFilter;
+            const matchesPrice = (minPrice === '' || room.price >= parseInt(minPrice)) && 
+                                 (maxPrice === '' || room.price <= parseInt(maxPrice));
+
+            return matchesSearch && matchesStatus && matchesPrice;
+        });
+
+        displayRooms(filteredRooms);
+    } catch (error) {
+        console.error('Error in filterRooms:', error);
+        showError('เกิดข้อผิดพลาดในการกรองข้อมูล');
+    } finally {
+        isProcessing = false;
+    }
 }
 
 function showRoomDetails(index) {
@@ -109,33 +145,24 @@ function formatDate(dateString) {
     return `${day}/${month}/${year}`;
 }
 
-function filterRooms() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-    const minPrice = document.getElementById('minPrice').value;
-    const maxPrice = document.getElementById('maxPrice').value;
-
-    const filteredRooms = roomsData.filter(room => {
-        const matchesSearch = room.room_number.toLowerCase().includes(searchTerm);
-        const matchesStatus = statusFilter === '' || room.status.toLowerCase() === statusFilter;
-        const matchesPrice = (minPrice === '' || room.price >= parseInt(minPrice)) && 
-                             (maxPrice === '' || room.price <= parseInt(maxPrice));
-
-        return matchesSearch && matchesStatus && matchesPrice;
-    });
-
-    displayRooms(filteredRooms);
-}
-
 function showError(message) {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = `<div class="alert alert-danger" role="alert">${message}</div>`;
 }
 
-document.getElementById('searchInput').addEventListener('input', filterRooms);
+document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(window.filterTimeout);
+    window.filterTimeout = setTimeout(filterRooms, 300);
+});
 document.getElementById('statusFilter').addEventListener('change', filterRooms);
-document.getElementById('minPrice').addEventListener('input', filterRooms);
-document.getElementById('maxPrice').addEventListener('input', filterRooms);
+document.getElementById('minPrice').addEventListener('input', () => {
+    clearTimeout(window.filterTimeout);
+    window.filterTimeout = setTimeout(filterRooms, 300);
+});
+document.getElementById('maxPrice').addEventListener('input', () => {
+    clearTimeout(window.filterTimeout);
+    window.filterTimeout = setTimeout(filterRooms, 300);
+});
 
 document.getElementById('loginForm').addEventListener('submit', function(e) {
     e.preventDefault();
