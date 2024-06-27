@@ -1,5 +1,5 @@
 module.exports = async (req, res) => {
-  const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/YourUsername/YourRepo/main/db.json';
+  const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/NutkungZz/sandy-rental/main/db.json';
 
   try {
     const response = await fetch(GITHUB_RAW_URL);
