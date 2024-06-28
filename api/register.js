@@ -5,19 +5,6 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-console.log('Supabase URL:', supabaseUrl);
-console.log('Supabase Key:', supabaseKey ? 'Set' : 'Not set');
-
-// Test Supabase connection
-supabase.from('users').select('count').single()
-  .then(({ data, error }) => {
-    if (error) {
-      console.error('Supabase connection error:', error);
-    } else {
-      console.log('Supabase connection successful, user count:', data.count);
-    }
-  });
-
 module.exports = async (req, res) => {
   console.log('Register API called');
 
@@ -29,10 +16,20 @@ module.exports = async (req, res) => {
     return res.status(200).end();
   }
 
+  if (req.method !== 'POST') {
+    return res.status(405).json({ success: false, message: 'Method Not Allowed' });
+  }
+
+  console.log('Request body:', req.body);
+
+  if (!req.body || typeof req.body !== 'object') {
+    return res.status(400).json({ success: false, message: 'Invalid request body' });
+  }
+
   try {
     const { email, password, secretKey } = req.body;
 
-    console.log('Received data:', { email, secretKey: '****' });
+    console.log('Received data:', { email: email || 'not provided', secretKey: secretKey ? '****' : 'not provided' });
 
     if (!email || !password || !secretKey) {
       return res.status(400).json({ success: false, message: 'ข้อมูลไม่ครบถ้วน' });
