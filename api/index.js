@@ -4,7 +4,7 @@ module.exports = (req, res) => {
   // Parse JSON bodies
   bodyParser.json()(req, res, () => {
     const { pathname } = new URL(req.url, `http://${req.headers.host}`);
-    
+    ///
     if (pathname === '/api/rooms') {
       require('./rooms')(req, res);
     } else if (pathname === '/api/tenants') {
