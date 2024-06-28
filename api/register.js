@@ -59,14 +59,17 @@ module.exports = async (req, res) => {
 
     console.log('Email not in use, proceeding with password hashing');
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     console.log('Password hashed, inserting new user');
 
     const { data, error } = await supabase
       .from('users')
-      .insert({ email, password_hash: hashedPassword, is_admin: true });
+      .insert({ 
+        email, 
+        password_hash: hashedPassword, 
+        is_admin: true
+      });
 
     if (error) {
       console.error('Error inserting new user:', error);
