@@ -34,6 +34,8 @@
             const password = document.getElementById('password').value;
             const secretKey = document.getElementById('secretKey').value;
 
+            console.log('Sending data:', { email, secretKey: '****' });
+
             fetch('/api/register', {
                 method: 'POST',
                 headers: {
@@ -41,8 +43,12 @@
                 },
                 body: JSON.stringify({ email, password, secretKey }),
             })
-            .then(response => response.json())
+            .then(response => {
+                console.log('Response status:', response.status);
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.success) {
                     alert('ลงทะเบียนสำเร็จ');
                     this.reset();
