@@ -5,18 +5,16 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY; // ตั้งค่านี้ใน Vercel
+const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY;
 
 module.exports = async (req, res) => {
   const { email, password, secretKey } = req.body;
 
-  // ตรวจสอบรหัสลับ
   if (secretKey !== ADMIN_SECRET_KEY) {
     return res.status(403).json({ success: false, message: 'รหัสลับไม่ถูกต้อง' });
   }
 
   try {
-    // ตรวจสอบว่าอีเมลซ้ำหรือไม่
     const { data: existingUser } = await supabase
       .from('users')
       .select('email')
@@ -27,11 +25,9 @@ module.exports = async (req, res) => {
       return res.status(400).json({ success: false, message: 'อีเมลนี้ถูกใช้แล้ว' });
     }
 
-    // สร้าง hash จากรหัสผ่าน
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // บันทึกข้อมูลลงในฐานข้อมูล
     const { data, error } = await supabase
       .from('users')
       .insert({ email, password_hash: hashedPassword, is_admin: true });
