@@ -10,7 +10,6 @@ module.exports = (req, res) => {
   } else if (pathname === '/api/register') {
     require('./register')(req, res);
   } else if (pathname.startsWith('/api/tenants/')) {
-    // สำหรับ PUT และ DELETE requests ที่มี id
     req.query = { id: pathname.split('/')[3] };
     require('./tenants')(req, res);
   } else {
