@@ -1,5 +1,5 @@
 module.exports = (req, res) => {
-  const { pathname } = new URL(req.url, `http://${req.headers.host}`);
+  const { pathname } = new URL(req.url, 'http://${req.headers.host}');
   
   if (pathname === '/api/rooms') {
     require('./rooms')(req, res);
