@@ -16,7 +16,10 @@ module.exports = (req, res) => {
     } else if (pathname.startsWith('/api/tenants/')) {
       req.query = { id: pathname.split('/')[3] };
       require('./tenants')(req, res);
-    } else {
+    } else if (pathname === '/api/payments') {
+      require('./payments')(req, res);
+    } 
+    else {
       res.status(404).json({ error: "Not Found" });
     }
   });
