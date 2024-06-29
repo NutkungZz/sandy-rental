@@ -11,7 +11,10 @@
 </head>
 <body>
     <div class="container mt-3">
-        <h1>ระบบจัดการผู้เช่า</h1>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>ระบบจัดการผู้เช่า</h1>
+            <button id="logoutButton" class="btn btn-danger">ออกจากระบบ</button>
+        </div>
         <div id="tenantList"></div>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTenantModal">เพิ่มผู้เช่าใหม่</button>
     </div>
