@@ -19,11 +19,11 @@ module.exports = async (req, res) => {
     if (error) throw error;
 
     if (data) {
-      // ตรวจสอบรหัสผ่าน
+      // ตรวจสอบรหัสผ่านโดยเปรียบเทียบกับ hash ที่เก็บไว้
       const isMatch = await bcrypt.compare(password, data.password_hash);
 
       if (isMatch) {
-        // สร้าง token (ตัวอย่างอย่างง่าย, ในระบบจริงควรใช้ JWT)
+        // สร้าง token (ในระบบจริงควรใช้ JWT)
         const token = Math.random().toString(36).substr(2);
         
         res.json({ success: true, token, user: { id: data.id, email: data.email } });
