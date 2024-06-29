@@ -22,6 +22,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // ถ้าไม่มี token และพยายามเข้าถึง admin.html โดยตรง ให้ redirect กลับไปที่ index.html
         window.location.href = 'index.html';
     }
+
+    // เพิ่มการจัดการ event เมื่อ modal ถูกปิด
+    const loginModal = document.getElementById('loginModal');
+    loginModal.addEventListener('hidden.bs.modal', function () {
+        document.body.classList.remove('modal-open');
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+    });
 });
 
 function fetchRooms() {
