@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchTenants();
     fetchRooms();
     fetchPayments();
+
+    // เพิ่ม event listener สำหรับปุ่ม logout
+    document.getElementById('logoutBtn').addEventListener('click', logout);
 });
 
 function fetchTenants() {
@@ -175,7 +178,7 @@ function editTenant(id) {
     const tenant = tenants.find(t => t.id === id);
     if (tenant) {
         document.getElementById('tenantId').value = tenant.id;
-        document.getElementById('roomId').value = tenant.room_id;
+		document.getElementById('roomId').value = tenant.room_id;
         document.getElementById('tenantName').value = tenant.name;
         document.getElementById('tenantPhone').value = tenant.phone;
         document.getElementById('tenantEmail').value = tenant.email;
@@ -223,4 +226,10 @@ function formatDate(dateString) {
     if (!dateString) return '';
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
+}
+
+// เพิ่มฟังก์ชัน logout
+function logout() {
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
 }
