@@ -1,64 +1,47 @@
 let tenants = [];
 let rooms = [];
+let payments = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) {
         window.location.href = 'index.html';
         return;
     }
     fetchTenants();
     fetchRooms();
+    fetchPayments();
 });
 
 function fetchTenants() {
-    const token = localStorage.getItem('token');
-    fetch('/api/tenants', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Unauthorized');
-            }
-            return response.json();
-        })
+    fetch('/api/tenants')
+        .then(response => response.json())
         .then(data => {
             tenants = data;
             displayTenants();
+            populateTenantSelect();
         })
-        .catch(error => {
-            console.error('Error:', error);
-            if (error.message === 'Unauthorized') {
-                logout();
-            }
-        });
+        .catch(error => console.error('Error:', error));
 }
 
 function fetchRooms() {
-    const token = localStorage.getItem('token');
-    fetch('/api/rooms', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Unauthorized');
-            }
-            return response.json();
-        })
+    fetch('/api/rooms')
+        .then(response => response.json())
         .then(data => {
             rooms = data;
             populateRoomSelect();
         })
-        .catch(error => {
-            console.error('Error:', error);
-            if (error.message === 'Unauthorized') {
-                logout();
-            }
-        });
+        .catch(error => console.error('Error:', error));
+}
+
+function fetchPayments() {
+    fetch('/api/payments')
+        .then(response => response.json())
+        .then(data => {
+            payments = data;
+            displayPayments();
+        })
+        .catch(error => console.error('Error:', error));
 }
 
 function displayTenants() {
@@ -84,6 +67,28 @@ function displayTenants() {
     });
 }
 
+function displayPayments() {
+    const paymentList = document.getElementById('paymentList');
+    paymentList.innerHTML = '';
+
+    payments.forEach(payment => {
+        const tenant = tenants.find(t => t.id === payment.tenant_id);
+        const paymentCard = `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">การชำระเงิน - ${tenant ? tenant.name : 'ไม่ระบุผู้เช่า'}</h5>
+                    <p class="card-text">จำนวนเงิน: ${payment.amount} บาท</p>
+                    <p class="card-text">วันที่ชำระ: ${formatDate(payment.payment_date)}</p>
+                    <p class="card-text">วิธีการชำระ: ${payment.payment_method}</p>
+                    <button class="btn btn-primary btn-sm" onclick="editPayment(${payment.id})">แก้ไข</button>
+                    <button class="btn btn-danger btn-sm" onclick="deletePayment(${payment.id})">ลบ</button>
+                </div>
+            </div>
+        `;
+        paymentList.innerHTML += paymentCard;
+    });
+}
+
 function populateRoomSelect() {
     const roomSelect = document.getElementById('roomId');
     roomSelect.innerHTML = '';
@@ -95,9 +100,19 @@ function populateRoomSelect() {
     });
 }
 
+function populateTenantSelect() {
+    const tenantSelect = document.getElementById('paymentTenantId');
+    tenantSelect.innerHTML = '';
+    tenants.forEach(tenant => {
+        const option = document.createElement('option');
+        option.value = tenant.id;
+        option.textContent = `${tenant.name} (ห้อง ${tenant.rooms.room_number})`;
+        tenantSelect.appendChild(option);
+    });
+}
+
 document.getElementById('tenantForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    const token = localStorage.getItem('token');
     const tenantData = {
         id: document.getElementById('tenantId').value,
         room_id: document.getElementById('roomId').value,
@@ -115,27 +130,45 @@ document.getElementById('tenantForm').addEventListener('submit', function(e) {
         method: method,
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(tenantData),
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Unauthorized');
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         fetchTenants();
         document.getElementById('tenantForm').reset();
         new bootstrap.Modal(document.getElementById('addTenantModal')).hide();
     })
-    .catch(error => {
-        console.error('Error:', error);
-        if (error.message === 'Unauthorized') {
-            logout();
-        }
-    });
+    .catch(error => console.error('Error:', error));
+});
+
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const paymentData = {
+        id: document.getElementById('paymentId').value,
+        tenant_id: document.getElementById('paymentTenantId').value,
+        amount: document.getElementById('paymentAmount').value,
+        payment_date: document.getElementById('paymentDate').value,
+        payment_method: document.getElementById('paymentMethod').value
+    };
+
+    const url = paymentData.id ? `/api/payments/${paymentData.id}` : '/api/payments';
+    const method = paymentData.id ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        fetchPayments();
+        document.getElementById('paymentForm').reset();
+        new bootstrap.Modal(document.getElementById('addPaymentModal')).hide();
+    })
+    .catch(error => console.error('Error:', error));
 });
 
 function editTenant(id) {
@@ -154,28 +187,35 @@ function editTenant(id) {
 
 function deleteTenant(id) {
     if (confirm('คุณแน่ใจหรือไม่ที่จะลบผู้เช่านี้?')) {
-        const token = localStorage.getItem('token');
-        fetch(`/api/tenants/${id}`, { 
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Unauthorized');
-                }
-                return response.json();
-            })
+        fetch(`/api/tenants/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
             .then(data => {
                 fetchTenants();
             })
-            .catch(error => {
-                console.error('Error:', error);
-                if (error.message === 'Unauthorized') {
-                    logout();
-                }
-            });
+            .catch(error => console.error('Error:', error));
+    }
+}
+
+function editPayment(id) {
+    const payment = payments.find(p => p.id === id);
+    if (payment) {
+        document.getElementById('paymentId').value = payment.id;
+        document.getElementById('paymentTenantId').value = payment.tenant_id;
+        document.getElementById('paymentAmount').value = payment.amount;
+        document.getElementById('paymentDate').value = payment.payment_date;
+        document.getElementById('paymentMethod').value = payment.payment_method;
+        new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
+    }
+}
+
+function deletePayment(id) {
+    if (confirm('คุณแน่ใจหรือไม่ที่จะลบการชำระเงินนี้?')) {
+        fetch(`/api/payments/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                fetchPayments();
+            })
+            .catch(error => console.error('Error:', error));
     }
 }
 
@@ -184,11 +224,3 @@ function formatDate(dateString) {
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
 }
-
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    window.location.href = 'index.html';
-}
-
-document.getElementById('logoutButton').addEventListener('click', logout);
