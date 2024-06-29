@@ -2,8 +2,8 @@ let tenants = [];
 let rooms = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) {
+    const token = localStorage.getItem('token');
+    if (!token) {
         window.location.href = 'index.html';
         return;
     }
@@ -12,23 +12,53 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function fetchTenants() {
-    fetch('/api/tenants')
-        .then(response => response.json())
+    const token = localStorage.getItem('token');
+    fetch('/api/tenants', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Unauthorized');
+            }
+            return response.json();
+        })
         .then(data => {
             tenants = data;
             displayTenants();
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            if (error.message === 'Unauthorized') {
+                logout();
+            }
+        });
 }
 
 function fetchRooms() {
-    fetch('/api/rooms')
-        .then(response => response.json())
+    const token = localStorage.getItem('token');
+    fetch('/api/rooms', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Unauthorized');
+            }
+            return response.json();
+        })
         .then(data => {
             rooms = data;
             populateRoomSelect();
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => {
+            console.error('Error:', error);
+            if (error.message === 'Unauthorized') {
+                logout();
+            }
+        });
 }
 
 function displayTenants() {
@@ -67,6 +97,7 @@ function populateRoomSelect() {
 
 document.getElementById('tenantForm').addEventListener('submit', function(e) {
     e.preventDefault();
+    const token = localStorage.getItem('token');
     const tenantData = {
         id: document.getElementById('tenantId').value,
         room_id: document.getElementById('roomId').value,
@@ -84,16 +115,27 @@ document.getElementById('tenantForm').addEventListener('submit', function(e) {
         method: method,
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(tenantData),
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Unauthorized');
+        }
+        return response.json();
+    })
     .then(data => {
         fetchTenants();
         document.getElementById('tenantForm').reset();
         new bootstrap.Modal(document.getElementById('addTenantModal')).hide();
     })
-    .catch(error => console.error('Error:', error));
+    .catch(error => {
+        console.error('Error:', error);
+        if (error.message === 'Unauthorized') {
+            logout();
+        }
+    });
 });
 
 function editTenant(id) {
@@ -112,12 +154,28 @@ function editTenant(id) {
 
 function deleteTenant(id) {
     if (confirm('คุณแน่ใจหรือไม่ที่จะลบผู้เช่านี้?')) {
-        fetch(`/api/tenants/${id}`, { method: 'DELETE' })
-            .then(response => response.json())
+        const token = localStorage.getItem('token');
+        fetch(`/api/tenants/${id}`, { 
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Unauthorized');
+                }
+                return response.json();
+            })
             .then(data => {
                 fetchTenants();
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                if (error.message === 'Unauthorized') {
+                    logout();
+                }
+            });
     }
 }
 
@@ -126,3 +184,11 @@ function formatDate(dateString) {
     const [year, month, day] = dateString.split('-');
     return `${day}/${month}/${year}`;
 }
+
+function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = 'index.html';
+}
+
+document.getElementById('logoutButton').addEventListener('click', logout);
