@@ -1,236 +1,122 @@
-let roomsData = [];
-let isProcessing = false;
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการ - Little Sand Home by Sandy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+    <div class="container mt-3">
+        <h1>ระบบจัดการ Little Sand Home</h1>
+        <ul class="nav nav-tabs" id="adminTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tenants-tab" data-bs-toggle="tab" data-bs-target="#tenants" type="button" role="tab">ผู้เช่า</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button" role="tab">การชำระเงิน</button>
+            </li>
+        </ul>
+        <div class="tab-content mt-3" id="adminTabContent">
+            <div class="tab-pane fade show active" id="tenants" role="tabpanel">
+                <div id="tenantList"></div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTenantModal">เพิ่มผู้เช่าใหม่</button>
+            </div>
+            <div class="tab-pane fade" id="payments" role="tabpanel">
+                <div id="paymentList"></div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">บันทึกการชำระเงิน</button>
+            </div>
+        </div>
+    </div>
 
-document.addEventListener('DOMContentLoaded', function() {
-    fetchRooms();
-    
-    document.getElementById('searchInput').addEventListener('input', filterRooms);
-    document.getElementById('statusFilter').addEventListener('change', filterRooms);
-    document.getElementById('minPrice').addEventListener('input', filterRooms);
-    document.getElementById('maxPrice').addEventListener('input', filterRooms);
-    
-    document.getElementById('loginForm').addEventListener('submit', handleLogin);
-
-    const adminLoginButton = document.querySelector('.btn-admin');
-    if (adminLoginButton) {
-        adminLoginButton.addEventListener('click', showLoginModal);
-    }
-
-    // เพิ่มการตรวจสอบ token เมื่อโหลดหน้า
-    const token = localStorage.getItem('token');
-    if (!token && window.location.pathname.includes('admin.html')) {
-        // ถ้าไม่มี token และพยายามเข้าถึง admin.html โดยตรง ให้ redirect กลับไปที่ index.html
-        window.location.href = 'index.html';
-    }
-
-    // เพิ่มการจัดการ event เมื่อ modal ถูกปิด
-    const loginModal = document.getElementById('loginModal');
-    loginModal.addEventListener('hidden.bs.modal', function () {
-        document.body.classList.remove('modal-open');
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.remove();
-        }
-    });
-});
-
-function fetchRooms() {
-    fetch('/api/rooms')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Fetched data:", data);
-            roomsData = data;
-            displayRooms(roomsData);
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showError('เกิดข้อผิดพลาดในการโหลดข้อมูล: ' + error.message);
-        });
-}
-
-function displayRooms(rooms) {
-    const roomList = document.getElementById('roomList');
-    roomList.innerHTML = '';
-    
-    if (rooms.length === 0) {
-        roomList.innerHTML = '<p>ไม่พบข้อมูลห้องพัก</p>';
-        return;
-    }
-
-    rooms.forEach((room, index) => {
-        let carouselItems = '';
-        let carouselIndicators = '';
-        room.images.forEach((image, i) => {
-            carouselItems += `
-                <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                    <img src="${image}" class="d-block w-100" alt="Room ${room.room_number} Image ${i+1}">
+    <!-- Modal สำหรับเพิ่ม/แก้ไขผู้เช่า -->
+    <div class="modal fade" id="addTenantModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">เพิ่ม/แก้ไขผู้เช่า</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-            `;
-            carouselIndicators += `
-                <button type="button" data-bs-target="#carousel${index}" data-bs-slide-to="${i}" 
-                    ${i === 0 ? 'class="active" aria-current="true"' : ''} aria-label="Slide ${i+1}"></button>
-            `;
-        });
-
-        const roomCard = `
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card room-card">
-                    <div id="carousel${index}" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-indicators">
-                            ${carouselIndicators}
+                <div class="modal-body">
+                    <form id="tenantForm">
+                        <input type="hidden" id="tenantId">
+                        <div class="mb-3">
+                            <label for="roomId" class="form-label">หมายเลขห้อง</label>
+                            <select class="form-select" id="roomId" required>
+                                <!-- ตัวเลือกห้องจะถูกเพิ่มด้วย JavaScript -->
+                            </select>
                         </div>
-                        <div class="carousel-inner">
-                            ${carouselItems}
+                        <div class="mb-3">
+                            <label for="tenantName" class="form-label">ชื่อผู้เช่า</label>
+                            <input type="text" class="form-control" id="tenantName" required>
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel${index}" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carousel${index}" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">${room.room_number}</h5>
-                        <p class="card-text ${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">
-                            สถานะ: ${room.status}
-                        </p>
-                        <p class="price">฿${room.price.toLocaleString()} / เดือน</p>
-                    </div>
-                    <div class="card-footer">
-                        <button class="btn btn-primary btn-sm" onclick="showRoomDetails(${index})">ดูรายละเอียด</button>
-                    </div>
+                        <div class="mb-3">
+                            <label for="tenantPhone" class="form-label">เบอร์โทรศัพท์</label>
+                            <input type="tel" class="form-control" id="tenantPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tenantEmail" class="form-label">อีเมล</label>
+                            <input type="email" class="form-control" id="tenantEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="moveInDate" class="form-label">วันที่เข้าอยู่</label>
+                            <input type="date" class="form-control" id="moveInDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="moveOutDate" class="form-label">วันที่ย้ายออก</label>
+                            <input type="date" class="form-control" id="moveOutDate">
+                        </div>
+                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                    </form>
                 </div>
             </div>
-        `;
-        roomList.innerHTML += roomCard;
-    });
-}
+        </div>
+    </div>
 
-function filterRooms() {
-    if (isProcessing) return;
-    isProcessing = true;
+    <!-- Modal สำหรับบันทึกการชำระเงิน -->
+    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">บันทึกการชำระเงิน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm">
+                        <input type="hidden" id="paymentId">
+                        <div class="mb-3">
+                            <label for="paymentTenantId" class="form-label">ผู้เช่า</label>
+                            <select class="form-select" id="paymentTenantId" required>
+                                <!-- ตัวเลือกผู้เช่าจะถูกเพิ่มด้วย JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentAmount" class="form-label">จำนวนเงิน</label>
+                            <input type="number" class="form-control" id="paymentAmount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentDate" class="form-label">วันที่ชำระ</label>
+                            <input type="date" class="form-control" id="paymentDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentMethod" class="form-label">วิธีการชำระเงิน</label>
+                            <select class="form-select" id="paymentMethod" required>
+                                <option value="เงินสด">เงินสด</option>
+                                <option value="โอนเงิน">โอนเงิน</option>
+                                <option value="บัตรเครดิต">บัตรเครดิต</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    try {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-        const minPrice = document.getElementById('minPrice').value;
-        const maxPrice = document.getElementById('maxPrice').value;
-
-        const filteredRooms = roomsData.filter(room => {
-            const matchesSearch = room.room_number.toLowerCase().includes(searchTerm);
-            const matchesStatus = statusFilter === '' || room.status.toLowerCase() === statusFilter;
-            const matchesPrice = (minPrice === '' || room.price >= parseInt(minPrice)) && 
-                                 (maxPrice === '' || room.price <= parseInt(maxPrice));
-
-            return matchesSearch && matchesStatus && matchesPrice;
-        });
-
-        displayRooms(filteredRooms);
-    } catch (error) {
-        console.error('Error in filterRooms:', error);
-        showError('เกิดข้อผิดพลาดในการกรองข้อมูล');
-    } finally {
-        isProcessing = false;
-    }
-}
-
-function showRoomDetails(index) {
-    const room = roomsData[index];
-    const amenitiesList = room.amenities.join(', ');
-
-    const detailContent = `
-        <h4 class="mb-3">${room.room_number}</h4>
-        <p><strong>ราคา:</strong> ฿${room.price.toLocaleString()} / เดือน</p>
-        <p><strong>สถานะ:</strong> <span class="${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">${room.status}</span></p>
-        <p><strong>ขนาดห้อง:</strong> ${room.size}</p>
-        <p><strong>สิ่งอำนวยความสะดวก:</strong> ${amenitiesList}</p>
-        <p><strong>รายละเอียด:</strong> ${room.description}</p>
-        <h5 class="mt-4 mb-2">ประวัติการเช่า</h5>
-        <ul class="list-unstyled">
-            <li><strong>วันที่เริ่มต้น:</strong> ${formatDate(room.rental_start)}</li>
-            <li><strong>วันที่สิ้นสุด:</strong> ${formatDate(room.rental_end)}</li>
-        </ul>
-        <p><a href="https://www.google.com/maps?q=${room.latitude},${room.longitude}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-map-marker-alt"></i> ดูตำแหน่งบน Google Maps</a></p>
-    `;
-
-    document.getElementById('roomDetailContent').innerHTML = detailContent;
-    new bootstrap.Modal(document.getElementById('roomDetailModal')).show();
-}
-
-function formatDate(dateString) {
-    if (!dateString || dateString === '9999-12-31') return 'ไม่ระบุ';
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
-}
-
-function showError(message) {
-    const roomList = document.getElementById('roomList');
-    roomList.innerHTML = `<div class="alert alert-danger" role="alert">${message}</div>`;
-}
-
-function showLoginModal() {
-    const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-    loginModal.show();
-}
-
-function handleLogin(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    fetch('/api/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            window.location.href = 'admin.html';
-        } else {
-            alert(data.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
-    });
-}
-
-function handleRegister(e) {
-  e.preventDefault();
-  const email = document.getElementById('registerEmail').value;
-  const password = document.getElementById('registerPassword').value;
-
-  fetch('/api/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('ลงทะเบียนสำเร็จ');
-      // ทำการ login อัตโนมัติหรือนำผู้ใช้ไปยังหน้า login
-    } else {
-      alert(data.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('เกิดข้อผิดพลาดในการลงทะเบียน');
-  });
-}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/admin.js"></script>
+</body>
+</html>
