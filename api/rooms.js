@@ -39,11 +39,11 @@ module.exports = async (req, res) => {
         case 'PUT':
             try {
                 const { id } = req.query;
-                const { room_number, price } = req.body;
+                const { room_number, price, size, description } = req.body;
                 
                 const { data, error } = await supabase
                     .from('rooms')
-                    .update({ room_number, price })
+                    .update({ room_number, price, size, description })
                     .eq('id', id);
                 
                 if (error) throw error;
