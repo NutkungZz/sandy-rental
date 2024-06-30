@@ -189,80 +189,64 @@ body {
 }
 
 #fullImageModal .modal-dialog {
-    max-width: 90vw;
-    max-height: 90vh;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    margin: 0;
 }
 
 #fullImageModal .modal-content {
-    background-color: transparent;
+    height: 100%;
     border: none;
-    height: auto;
-    width: auto;
-    max-width: 100%;
-    max-height: 100%;
+    border-radius: 0;
+    background: rgba(0, 0, 0, 0.9);
 }
 
 #fullImageModal .modal-body {
-    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.9);
-    height: auto;
-}
-
-#fullImageModal .carousel {
-    width: 100%;
+    padding: 0;
     height: 100%;
 }
 
+#fullImageModal .carousel,
+#fullImageModal .carousel-inner,
 #fullImageModal .carousel-item {
-    text-align: center;
-    transition: transform 0.6s ease-in-out;
+    height: 100%;
 }
 
 #fullImageModal .carousel-item img {
     max-width: 100%;
-    max-height: 85vh;
-    width: auto;
-    height: auto;
+    max-height: 100%;
     object-fit: contain;
+    transition: opacity 0.3s ease;
 }
 
 #fullImageModal .carousel-control-prev,
 #fullImageModal .carousel-control-next {
     width: 10%;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-#fullImageModal:hover .carousel-control-prev,
-#fullImageModal:hover .carousel-control-next {
-    opacity: 1;
+    opacity: 0.7;
 }
 
 #fullImageModal .carousel-control-prev-icon,
 #fullImageModal .carousel-control-next-icon {
-    background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
     width: 40px;
     height: 40px;
-    background-size: 20px;
 }
 
 #fullImageModal .btn-close {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 20px;
+    right: 20px;
     z-index: 1050;
-    background-color: white;
+    background: white;
     opacity: 0.7;
-    font-size: 1.5rem;
-    padding: 5px;
+    font-size: 2rem;
+    padding: 0;
+    margin: 0;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     transition: opacity 0.3s ease;
 }
