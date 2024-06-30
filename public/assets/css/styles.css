@@ -169,6 +169,16 @@ body {
     text-decoration: underline;
 }
 
+#roomDetailCarousel {
+    max-height: 400px; /* ปรับความสูงตามต้องการ */
+}
+
+#roomDetailCarousel .carousel-item img {
+    object-fit: cover;
+    height: 400px; /* ควรเท่ากับ max-height ของ carousel */
+    width: 100%;
+}
+
 @media (min-width: 768px) {
     .header-container {
         flex-direction: row;
