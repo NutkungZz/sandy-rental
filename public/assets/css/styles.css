@@ -169,14 +169,32 @@ body {
     text-decoration: underline;
 }
 
-#roomDetailCarousel {
-    max-height: 400px; /* ปรับความสูงตามต้องการ */
+.image-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-#roomDetailCarousel .carousel-item img {
+.gallery-thumbnail {
+    width: 100px;
+    height: 100px;
     object-fit: cover;
-    height: 400px; /* ควรเท่ากับ max-height ของ carousel */
-    width: 100%;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.gallery-thumbnail:hover {
+    transform: scale(1.05);
+}
+
+#fullImageModal .modal-body {
+    padding: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+#fullImageModal .img-fluid {
+    max-height: 90vh;
+    max-width: 90vw;
 }
 
 @media (min-width: 768px) {
