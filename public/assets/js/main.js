@@ -1,13 +1,7 @@
 let roomsData = [];
-let isProcessing = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     fetchRooms();
-    
-    document.getElementById('searchInput').addEventListener('input', filterRooms);
-    document.getElementById('statusFilter').addEventListener('change', filterRooms);
-    document.getElementById('minPrice').addEventListener('input', filterRooms);
-    document.getElementById('maxPrice').addEventListener('input', filterRooms);
     
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
 });
@@ -22,7 +16,7 @@ function fetchRooms() {
         })
         .then(data => {
             console.log("Fetched data:", data);
-            roomsData = data;
+            roomsData = data.sort((a, b) => b.price - a.price); // เรียงลำดับจากแพงสุดไปถูกสุด
             displayRooms(roomsData);
         })
         .catch(error => {
@@ -36,7 +30,7 @@ function displayRooms(rooms) {
     roomList.innerHTML = '';
 
     rooms.forEach(room => {
-        const status = room.status || 'ว่าง'; // ใช้ค่าเริ่มต้นเป็น 'ว่าง' ถ้าไม่มีข้อมูล
+        const status = room.status || 'ว่าง';
         const statusClass = status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied';
 
         const roomCard = `
@@ -62,7 +56,7 @@ function displayRooms(rooms) {
                                 </button>
                             ` : ''}
                         </div>
-                    ` : ''}
+                    ` : '<img src="path/to/default-image.jpg" class="card-img-top" alt="No image available">'}
                     <div class="card-body">
                         <h5 class="card-title">${room.room_number}</h5>
                         <p class="card-text ${statusClass}">
@@ -81,42 +75,22 @@ function displayRooms(rooms) {
     });
 }
 
-function filterRooms() {
-    if (isProcessing) return;
-    isProcessing = true;
-
-    try {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
-        const minPrice = document.getElementById('minPrice').value;
-        const maxPrice = document.getElementById('maxPrice').value;
-
-        const filteredRooms = roomsData.filter(room => {
-            const matchesSearch = room.room_number.toLowerCase().includes(searchTerm);
-            const matchesStatus = statusFilter === '' || room.status.toLowerCase() === statusFilter;
-            const matchesPrice = (minPrice === '' || room.price >= parseInt(minPrice)) && 
-                                 (maxPrice === '' || room.price <= parseInt(maxPrice));
-
-            return matchesSearch && matchesStatus && matchesPrice;
-        });
-
-        displayRooms(filteredRooms);
-    } catch (error) {
-        console.error('Error in filterRooms:', error);
-        showError('เกิดข้อผิดพลาดในการกรองข้อมูล');
-    } finally {
-        isProcessing = false;
-    }
-}
-
 function showRoomDetails(id) {
     const room = roomsData.find(r => r.id === id);
+    if (!room) {
+        console.error('Room not found');
+        return;
+    }
+
+    const status = room.status || 'ว่าง';
+    const statusClass = (status.toLowerCase() === 'ว่าง') ? 'status-available' : 'status-occupied';
+    
     const amenitiesList = room.amenities ? room.amenities.join(', ') : 'ไม่มีข้อมูล';
 
     const detailContent = `
         <h4 class="mb-3">${room.room_number}</h4>
         <p><strong>ราคา:</strong> ฿${room.price.toLocaleString()} / เดือน</p>
-        <p><strong>สถานะ:</strong> <span class="${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">${room.status}</span></p>
+        <p><strong>สถานะ:</strong> <span class="${statusClass}">${status}</span></p>
         <p><strong>ขนาดห้อง:</strong> ${room.size || 'ไม่ระบุ'} ตร.ม.</p>
         <p><strong>สิ่งอำนวยความสะดวก:</strong> ${amenitiesList}</p>
         <p><strong>รายละเอียด:</strong> ${room.description || 'ไม่มีข้อมูล'}</p>
@@ -159,4 +133,10 @@ function handleLogin(e) {
         console.error('Error:', error);
         alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
     });
+}
+
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const [year, month, day] = dateString.split('-');
+    return `${day}/${month}/${year}`;
 }
