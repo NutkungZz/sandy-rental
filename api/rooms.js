@@ -23,11 +23,11 @@ module.exports = async (req, res) => {
 
         case 'POST':
             try {
-                const { room_number, price } = req.body;
+                const { room_number, price, size, description, images, status } = req.body;
                 
                 const { data, error } = await supabase
                     .from('rooms')
-                    .insert({ room_number, price });
+                    .insert({ room_number, price, size, description, images, status });
                 
                 if (error) throw error;
                 res.status(201).json(data);
