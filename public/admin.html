@@ -20,6 +20,9 @@
                 <button class="nav-link active" id="tenants-tab" data-bs-toggle="tab" data-bs-target="#tenants" type="button" role="tab">ผู้เช่า</button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="rooms-tab" data-bs-toggle="tab" data-bs-target="#rooms" type="button" role="tab">ห้องเช่า</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link" id="payments-tab" data-bs-toggle="tab" data-bs-target="#payments" type="button" role="tab">การชำระเงิน</button>
             </li>
         </ul>
@@ -27,6 +30,9 @@
             <div class="tab-pane fade show active" id="tenants" role="tabpanel">
                 <div id="tenantList"></div>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTenantModal">เพิ่มผู้เช่าใหม่</button>
+            </div>
+            <div class="tab-pane fade" id="rooms" role="tabpanel">
+                <div id="roomList"></div>
             </div>
             <div class="tab-pane fade" id="payments" role="tabpanel">
                 <div id="paymentList"></div>
