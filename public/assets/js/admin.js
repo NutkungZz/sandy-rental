@@ -267,6 +267,8 @@ function editRoom(id) {
         document.getElementById('editRoomId').value = room.id;
         document.getElementById('editRoomNumber').value = room.room_number;
         document.getElementById('editRoomPrice').value = room.price;
+        document.getElementById('editRoomSize').value = room.size || '';
+        document.getElementById('editRoomDescription').value = room.description || '';
         new bootstrap.Modal(document.getElementById('editRoomModal')).show();
     }
 }
@@ -276,7 +278,9 @@ document.getElementById('editRoomForm').addEventListener('submit', function(e) {
     const roomData = {
         id: document.getElementById('editRoomId').value,
         room_number: document.getElementById('editRoomNumber').value,
-        price: parseFloat(document.getElementById('editRoomPrice').value)
+        price: parseFloat(document.getElementById('editRoomPrice').value),
+        size: parseFloat(document.getElementById('editRoomSize').value) || null,
+        description: document.getElementById('editRoomDescription').value
     };
     updateRoom(roomData);
 });
@@ -294,10 +298,11 @@ function updateRoom(roomData) {
         console.log('Room updated successfully:', data);
         fetchRooms(); // Refresh the room list
         new bootstrap.Modal(document.getElementById('editRoomModal')).hide();
+        showAlert('บันทึกข้อมูลสำเร็จ', 'ข้อมูลห้องเช่าได้รับการปรับปรุงเรียบร้อยแล้ว', 'success');
     })
     .catch(error => {
         console.error('Error updating room:', error);
-        alert('เกิดข้อผิดพลาดในการอัพเดทข้อมูลห้องเช่า');
+        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลห้องเช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
     });
 }
 
