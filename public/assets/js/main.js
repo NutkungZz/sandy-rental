@@ -157,7 +157,7 @@ function showFullImage(roomId, initialIndex) {
             <div class="modal-content">
                 <div class="modal-body">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <div id="fullImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div id="fullImageCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
                         <div class="carousel-inner">
                             ${room.images.map((img, index) => `
                                 <div class="carousel-item ${index === initialIndex ? 'active' : ''}">
@@ -183,6 +183,15 @@ function showFullImage(roomId, initialIndex) {
     modal.show();
     fullImageModal.addEventListener('hidden.bs.modal', function () {
         this.remove();
+    });
+
+    // เพิ่มการสนับสนุนการเลื่อนรูปด้วยปุ่มลูกศร
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            document.querySelector('#fullImageCarousel .carousel-control-prev').click();
+        } else if (e.key === 'ArrowRight') {
+            document.querySelector('#fullImageCarousel .carousel-control-next').click();
+        }
     });
 }
 
