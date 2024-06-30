@@ -89,6 +89,7 @@ function displayRooms() {
                             <span class="status-badge ${statusClass}">${status}</span>
                         </p>
                         <p class="card-text">ราคา: ${room.price} บาท/เดือน</p>
+                        <p class="card-text">ขนาด: ${room.size || 'ไม่ระบุ'} ตร.ม.</p>
                         ${tenant ? `
                             <p class="card-text">ผู้เช่า: ${tenant.name}</p>
                             <p class="card-text">เบอร์โทร: ${tenant.phone}</p>
@@ -100,7 +101,7 @@ function displayRooms() {
                             <button class="btn btn-sm btn-danger btn-delete" onclick="deleteRoom(${room.id})">
                                 <i class="fas fa-trash"></i> ลบ
                             </button>
-			</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -267,43 +268,10 @@ function editRoom(id) {
         document.getElementById('editRoomId').value = room.id;
         document.getElementById('editRoomNumber').value = room.room_number;
         document.getElementById('editRoomPrice').value = room.price;
-        document.getElementById('editRoomSize').value = room.size || '';
+        document.getElementById('editRoomSize').value = room.size || ''; // แก้ไขตรงนี้
         document.getElementById('editRoomDescription').value = room.description || '';
         new bootstrap.Modal(document.getElementById('editRoomModal')).show();
     }
-}
-
-document.getElementById('editRoomForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const roomData = {
-        id: document.getElementById('editRoomId').value,
-        room_number: document.getElementById('editRoomNumber').value,
-        price: parseFloat(document.getElementById('editRoomPrice').value),
-        size: parseFloat(document.getElementById('editRoomSize').value) || null,
-        description: document.getElementById('editRoomDescription').value
-    };
-    updateRoom(roomData);
-});
-
-function updateRoom(roomData) {
-    fetch(`/api/rooms/${roomData.id}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(roomData),
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Room updated successfully:', data);
-        fetchRooms(); // Refresh the room list
-        new bootstrap.Modal(document.getElementById('editRoomModal')).hide();
-        showAlert('บันทึกข้อมูลสำเร็จ', 'ข้อมูลห้องเช่าได้รับการปรับปรุงเรียบร้อยแล้ว', 'success');
-    })
-    .catch(error => {
-        console.error('Error updating room:', error);
-        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลห้องเช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
-    });
 }
 
 function deleteRoom(id) {
@@ -322,9 +290,14 @@ document.getElementById('editRoomForm').addEventListener('submit', function(e) {
     const roomData = {
         id: document.getElementById('editRoomId').value,
         room_number: document.getElementById('editRoomNumber').value,
-        price: document.getElementById('editRoomPrice').value
+        price: parseFloat(document.getElementById('editRoomPrice').value),
+        size: document.getElementById('editRoomSize').value ? parseFloat(document.getElementById('editRoomSize').value) : null,
+        description: document.getElementById('editRoomDescription').value
     };
+    updateRoom(roomData);
+});
 
+function updateRoom(roomData) {
     fetch(`/api/rooms/${roomData.id}`, {
         method: 'PUT',
         headers: {
@@ -334,11 +307,26 @@ document.getElementById('editRoomForm').addEventListener('submit', function(e) {
     })
     .then(response => response.json())
     .then(data => {
-        fetchRooms();
-        new bootstrap.Modal(document.getElementById('editRoomModal')).hide();
+        console.log('Room updated successfully:', data);
+        fetchRooms(); // Refresh the room list
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editRoomModal'));
+        modal.hide();
+        showAlert('บันทึกข้อมูลสำเร็จ', 'ข้อมูลห้องเช่าได้รับการปรับปรุงเรียบร้อยแล้ว', 'success');
     })
-    .catch(error => console.error('Error:', error));
-});
+    .catch(error => {
+        console.error('Error updating room:', error);
+        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกข้อมูลห้องเช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
+    });
+}
+
+function showAlert(title, message, icon) {
+    Swal.fire({
+        title: title,
+        text: message,
+        icon: icon,
+        confirmButtonText: 'ตกลง'
+    });
+}
 
 function formatDate(dateString) {
     if (!dateString) return '';
