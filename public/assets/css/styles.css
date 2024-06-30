@@ -173,6 +173,7 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    justify-content: start;
 }
 
 .gallery-thumbnail {
@@ -195,6 +196,7 @@ body {
 #fullImageModal .img-fluid {
     max-height: 90vh;
     max-width: 90vw;
+    object-fit: contain;
 }
 
 @media (min-width: 768px) {
