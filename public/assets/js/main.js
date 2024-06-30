@@ -3,6 +3,11 @@ let roomsData = [];
 document.addEventListener('DOMContentLoaded', function() {
     fetchRooms();
     
+    document.getElementById('searchInput').addEventListener('input', filterRooms);
+    document.getElementById('statusFilter').addEventListener('change', filterRooms);
+    document.getElementById('minPrice').addEventListener('input', filterRooms);
+    document.getElementById('maxPrice').addEventListener('input', filterRooms);
+    
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
 });
 
@@ -25,9 +30,32 @@ function fetchRooms() {
         });
 }
 
+function filterRooms() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value.toLowerCase();
+    const minPrice = document.getElementById('minPrice').value;
+    const maxPrice = document.getElementById('maxPrice').value;
+
+    const filteredRooms = roomsData.filter(room => {
+        const matchesSearch = room.room_number.toLowerCase().includes(searchTerm);
+        const matchesStatus = statusFilter === '' || (room.status && room.status.toLowerCase() === statusFilter);
+        const matchesPrice = (minPrice === '' || room.price >= parseInt(minPrice)) && 
+                             (maxPrice === '' || room.price <= parseInt(maxPrice));
+
+        return matchesSearch && matchesStatus && matchesPrice;
+    });
+
+    displayRooms(filteredRooms);
+}
+
 function displayRooms(rooms) {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = '';
+
+    if (rooms.length === 0) {
+        roomList.innerHTML = '<p>ไม่พบห้องพักที่ตรงกับเงื่อนไขการค้นหา</p>';
+        return;
+    }
 
     rooms.forEach(room => {
         const status = room.status || 'ว่าง';
@@ -74,6 +102,8 @@ function displayRooms(rooms) {
         roomList.innerHTML += roomCard;
     });
 }
+
+// ฟังก์ชันอื่นๆ ยังคงเหมือนเดิม...
 
 function showRoomDetails(id) {
     const room = roomsData.find(r => r.id === id);
