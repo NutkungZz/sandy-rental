@@ -22,7 +22,8 @@ function fetchTenants() {
             tenants = data;
             displayTenants();
             populateTenantSelect();
-			})
+            displayRooms();
+        })
         .catch(error => console.error('Error:', error));
 }
 
@@ -73,7 +74,6 @@ function displayTenants() {
 function displayRooms() {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = `
-        <!-- การ์ดสำหรับเพิ่มห้องเช่าใหม่ -->
         <div class="col-md-4 mb-3">
             <div class="card h-100 add-room-card" data-bs-toggle="modal" data-bs-target="#addRoomModal">
                 <div class="card-body d-flex justify-content-center align-items-center">
@@ -261,7 +261,9 @@ document.getElementById('addRoomForm').addEventListener('submit', function(e) {
         price: parseFloat(document.getElementById('addRoomPrice').value),
         size: document.getElementById('addRoomSize').value ? parseFloat(document.getElementById('addRoomSize').value) : null,
         description: document.getElementById('addRoomDescription').value,
-        images: document.getElementById('addRoomImages').value.split(',').map(url => url.trim())
+        images: document.getElementById('addRoomImages').value.split(',').map(url => url.trim()),
+        amenities: document.getElementById('addRoomAmenities').value.split(',').map(item => item.trim()),
+        status: 'ว่าง'
     };
     addRoom(roomData);
 });
@@ -311,7 +313,7 @@ function deleteTenant(id) {
                 fetchTenants();
                 showAlert('ลบข้อมูลสำเร็จ', 'ข้อมูลผู้เช่าได้ถูกลบเรียบร้อยแล้ว', 'success');
             })
-            .catch(error => {
+			.catch(error => {
                 console.error('Error:', error);
                 showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลผู้เช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
             });
@@ -326,7 +328,7 @@ function editPayment(id) {
         document.getElementById('paymentAmount').value = payment.amount;
         document.getElementById('paymentDate').value = payment.payment_date;
         document.getElementById('paymentMethod').value = payment.payment_method;
-		new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
+        new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
     }
 }
 
@@ -353,6 +355,7 @@ function editRoom(id) {
         document.getElementById('editRoomPrice').value = room.price;
         document.getElementById('editRoomSize').value = room.size || '';
         document.getElementById('editRoomDescription').value = room.description || '';
+        document.getElementById('editRoomAmenities').value = room.amenities ? room.amenities.join(', ') : '';
         new bootstrap.Modal(document.getElementById('editRoomModal')).show();
     }
 }
@@ -379,7 +382,8 @@ document.getElementById('editRoomForm').addEventListener('submit', function(e) {
         room_number: document.getElementById('editRoomNumber').value,
         price: parseFloat(document.getElementById('editRoomPrice').value),
         size: document.getElementById('editRoomSize').value ? parseFloat(document.getElementById('editRoomSize').value) : null,
-        description: document.getElementById('editRoomDescription').value
+        description: document.getElementById('editRoomDescription').value,
+        amenities: document.getElementById('editRoomAmenities').value.split(',').map(item => item.trim())
     };
     updateRoom(roomData);
 });
@@ -395,7 +399,7 @@ function updateRoom(roomData) {
     .then(response => response.json())
     .then(data => {
         console.log('Room updated successfully:', data);
-        fetchRooms(); // Refresh the room list
+        fetchRooms();
         const modal = bootstrap.Modal.getInstance(document.getElementById('editRoomModal'));
         modal.hide();
         showAlert('บันทึกข้อมูลสำเร็จ', 'ข้อมูลห้องเช่าได้รับการปรับปรุงเรียบร้อยแล้ว', 'success');
