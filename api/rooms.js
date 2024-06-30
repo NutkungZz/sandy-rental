@@ -23,11 +23,11 @@ module.exports = async (req, res) => {
 
         case 'POST':
             try {
-                const { room_number, price, size, description, images, status } = req.body;
+                const { room_number, price, size, description, images, amenities, status } = req.body;
                 
                 const { data, error } = await supabase
                     .from('rooms')
-                    .insert({ room_number, price, size, description, images, status });
+                    .insert({ room_number, price, size, description, images, amenities, status });
                 
                 if (error) throw error;
                 res.status(201).json(data);
@@ -39,11 +39,11 @@ module.exports = async (req, res) => {
         case 'PUT':
             try {
                 const { id } = req.query;
-                const { room_number, price, size, description } = req.body;
+                const { room_number, price, size, description, images, amenities } = req.body;
                 
                 const { data, error } = await supabase
                     .from('rooms')
-                    .update({ room_number, price, size, description })
+                    .update({ room_number, price, size, description, images, amenities })
                     .eq('id', id);
                 
                 if (error) throw error;
