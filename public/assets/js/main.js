@@ -115,41 +115,19 @@ function showRoomDetails(id) {
     
     const amenitiesList = room.amenities ? room.amenities.join(', ') : 'ไม่มีข้อมูล';
 
-    let imagesCarousel = '';
+    let imageGallery = '';
     if (room.images && room.images.length > 0) {
-        const carouselItems = room.images.map((img, index) => `
-            <div class="carousel-item ${index === 0 ? 'active' : ''}">
-                <img src="${img}" class="d-block w-100" alt="Room ${room.room_number} Image ${index + 1}">
-            </div>
-        `).join('');
-
-        const carouselIndicators = room.images.map((img, index) => `
-            <button type="button" data-bs-target="#roomDetailCarousel" data-bs-slide-to="${index}" 
-                ${index === 0 ? 'class="active" aria-current="true"' : ''} aria-label="Slide ${index + 1}"></button>
-        `).join('');
-
-        imagesCarousel = `
-            <div id="roomDetailCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
-                <div class="carousel-indicators">
-                    ${carouselIndicators}
-                </div>
-                <div class="carousel-inner">
-                    ${carouselItems}
-                </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#roomDetailCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#roomDetailCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>
+        imageGallery = `
+            <div class="image-gallery mt-3">
+                ${room.images.map((img, index) => `
+                    <img src="${img}" alt="Room ${room.room_number} Image ${index + 1}" 
+                         class="gallery-thumbnail" onclick="showFullImage('${img}')">
+                `).join('')}
             </div>
         `;
     }
 
     const detailContent = `
-        ${imagesCarousel}
         <h4 class="mb-3">${room.room_number}</h4>
         <p><strong>ราคา:</strong> ฿${room.price.toLocaleString()} / เดือน</p>
         <p><strong>สถานะ:</strong> <span class="${statusClass}">${status}</span></p>
@@ -159,12 +137,35 @@ function showRoomDetails(id) {
         ${room.latitude && room.longitude ? `
             <p><a href="https://www.google.com/maps?q=${room.latitude},${room.longitude}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-map-marker-alt"></i> ดูตำแหน่งบน Google Maps</a></p>
         ` : ''}
+        ${imageGallery}
     `;
 
     document.getElementById('roomDetailContent').innerHTML = detailContent;
     new bootstrap.Modal(document.getElementById('roomDetailModal')).show();
 }
 
+function showFullImage(imageSrc) {
+    const fullImageModal = `
+        <div class="modal fade" id="fullImageModal" tabindex="-1">
+            <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body d-flex align-items-center justify-content-center">
+                        <img src="${imageSrc}" class="img-fluid" alt="Full size image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', fullImageModal);
+    const modal = new bootstrap.Modal(document.getElementById('fullImageModal'));
+    modal.show();
+    document.getElementById('fullImageModal').addEventListener('hidden.bs.modal', function () {
+        this.remove();
+    });
+}
 function showError(message) {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = `<div class="alert alert-danger" role="alert">${message}</div>`;
