@@ -1,144 +1,195 @@
+body {
+    font-family: 'Prompt', sans-serif;
+    background-color: #f5e6d3;
+    color: #4a4a4a;
+}
 
-        body {
-            font-family: 'Prompt', sans-serif;
-            background-color: #f5e6d3;
-            color: #4a4a4a;
-        }
-        .container {
-            max-width: 1200px;
-        }
-        h1 {
-            font-weight: 600;
-            color: #3c3c3c;
-            text-align: center;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 15px 0;
-            border-bottom: 1px solid #d4c3a9;
-            font-size: 1.8rem;
-        }
-        .room-card {
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background-color: #fff;
-        }
-        .room-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
-        .room-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            transition: all 0.3s ease;
-        }
-        .room-card:hover .room-image {
-            transform: scale(1.05);
-        }
-        .card-body {
-            padding: 1rem;
-            background: linear-gradient(to bottom, #ffffff, #f8f8f8);
-        }
-        .card-title {
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin-bottom: 0.3rem;
-            color: #3c3c3c;
-        }
-        .card-text {
-            color: #6c757d;
-            font-size: 0.9rem;
-            margin-bottom: 0.2rem;
-        }
-        .status-available {
-            color: #4caf50;
-            font-weight: 600;
-        }
-        .status-occupied {
-            color: #f44336;
-            font-weight: 600;
-        }
-        .price {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #3c3c3c;
-            margin-top: 0.3rem;
-        }
-        .carousel-inner img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .carousel-indicators {
-            bottom: 0;
-        }
-        .carousel-indicators button {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: #fff;
-            opacity: 0.5;
-        }
-        .carousel-indicators .active {
-            opacity: 1;
-        }
-        .form-control, .form-select {
-            border: 1px solid #d4c3a9;
-            font-size: 0.9rem;
-        }
-        .form-control:focus, .form-select:focus {
-            border-color: #8d6e63;
-            box-shadow: 0 0 0 0.2rem rgba(141, 110, 99, 0.25);
-        }
-        .card-footer {
-            background-color: transparent;
-            border-top: none;
-            padding-top: 0;
-        }
-        .btn-primary {
-            background-color: #8d6e63;
-            border-color: #8d6e63;
-            color: #fff;
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover {
-            background-color: #6d4c41;
-            border-color: #6d4c41;
-        }
-        .location-link {
-            color: #8d6e63;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        .location-link:hover {
-            color: #6d4c41;
-            text-decoration: underline;
-        }
-        .btn-admin {
-            background-color: #a1887f;
-            border-color: #a1887f;
-            color: #fff;
-            transition: all 0.3s ease;
-        }
-        .btn-admin:hover {
-            background-color: #8d6e63;
-            border-color: #8d6e63;
-        }
-        @media (max-width: 768px) {
-            .room-card {
-                margin-bottom: 15px;
-            }
-            .room-image {
-                height: 180px;
-            }
-        }
-        .admin-login {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-        }
+.container {
+    max-width: 1200px;
+}
+
+.header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.site-title {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #3c3c3c;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding: 15px 0;
+    border-bottom: 1px solid #d4c3a9;
+}
+
+.admin-login {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-admin {
+    font-size: 0.9rem;
+    padding: 5px 10px;
+    background-color: #a1887f;
+    border-color: #a1887f;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.btn-admin:hover {
+    background-color: #8d6e63;
+    border-color: #8d6e63;
+}
+
+.room-card {
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background-color: #fff;
+}
+
+.room-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.room-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.room-card:hover .room-image {
+    transform: scale(1.05);
+}
+
+.card-body {
+    padding: 1rem;
+    background: linear-gradient(to bottom, #ffffff, #f8f8f8);
+}
+
+.card-title {
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+    color: #3c3c3c;
+}
+
+.card-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0.2rem;
+}
+
+.status-available {
+    color: #4caf50;
+    font-weight: 600;
+}
+
+.status-occupied {
+    color: #f44336;
+    font-weight: 600;
+}
+
+.price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #3c3c3c;
+    margin-top: 0.3rem;
+}
+
+.carousel-inner img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.carousel-indicators {
+    bottom: 0;
+}
+
+.carousel-indicators button {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #fff;
+    opacity: 0.5;
+}
+
+.carousel-indicators .active {
+    opacity: 1;
+}
+
+.form-control, .form-select {
+    border: 1px solid #d4c3a9;
+    font-size: 0.9rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #8d6e63;
+    box-shadow: 0 0 0 0.2rem rgba(141, 110, 99, 0.25);
+}
+
+.card-footer {
+    background-color: transparent;
+    border-top: none;
+    padding-top: 0;
+}
+
+.btn-primary {
+    background-color: #8d6e63;
+    border-color: #8d6e63;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #6d4c41;
+    border-color: #6d4c41;
+}
+
+.location-link {
+    color: #8d6e63;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.location-link:hover {
+    color: #6d4c41;
+    text-decoration: underline;
+}
+
+@media (min-width: 768px) {
+    .header-container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .site-title {
+        margin-bottom: 0;
+    }
+
+    .admin-login {
+        width: auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .room-card {
+        margin-bottom: 15px;
+    }
+    .room-image {
+        height: 180px;
+    }
+}
