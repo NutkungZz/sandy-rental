@@ -271,6 +271,36 @@ function editRoom(id) {
     }
 }
 
+document.getElementById('editRoomForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const roomData = {
+        id: document.getElementById('editRoomId').value,
+        room_number: document.getElementById('editRoomNumber').value,
+        price: parseFloat(document.getElementById('editRoomPrice').value)
+    };
+    updateRoom(roomData);
+});
+
+function updateRoom(roomData) {
+    fetch(`/api/rooms/${roomData.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(roomData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Room updated successfully:', data);
+        fetchRooms(); // Refresh the room list
+        new bootstrap.Modal(document.getElementById('editRoomModal')).hide();
+    })
+    .catch(error => {
+        console.error('Error updating room:', error);
+        alert('เกิดข้อผิดพลาดในการอัพเดทข้อมูลห้องเช่า');
+    });
+}
+
 function deleteRoom(id) {
     if (confirm('คุณแน่ใจหรือไม่ที่จะลบห้องเช่านี้?')) {
         fetch(`/api/rooms/${id}`, { method: 'DELETE' })
