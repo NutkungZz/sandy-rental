@@ -211,7 +211,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.9);
     height: auto;
 }
 
@@ -222,6 +222,7 @@ body {
 
 #fullImageModal .carousel-item {
     text-align: center;
+    transition: transform 0.6s ease-in-out;
 }
 
 #fullImageModal .carousel-item img {
@@ -235,23 +236,39 @@ body {
 #fullImageModal .carousel-control-prev,
 #fullImageModal .carousel-control-next {
     width: 10%;
-    opacity: 0.7;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#fullImageModal:hover .carousel-control-prev,
+#fullImageModal:hover .carousel-control-next {
+    opacity: 1;
 }
 
 #fullImageModal .carousel-control-prev-icon,
 #fullImageModal .carousel-control-next-icon {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
-    padding: 20px;
+    width: 40px;
+    height: 40px;
+    background-size: 20px;
 }
 
 #fullImageModal .btn-close {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 15px;
     z-index: 1050;
     background-color: white;
     opacity: 0.7;
+    font-size: 1.5rem;
+    padding: 5px;
+    border-radius: 50%;
+    transition: opacity 0.3s ease;
+}
+
+#fullImageModal .btn-close:hover {
+    opacity: 1;
 }
 
 @media (min-width: 768px) {
