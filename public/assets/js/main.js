@@ -153,7 +153,7 @@ function showFullImage(roomId, initialIndex) {
     fullImageModal.className = 'modal fade';
     fullImageModal.id = 'fullImageModal';
     fullImageModal.innerHTML = `
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -161,7 +161,7 @@ function showFullImage(roomId, initialIndex) {
                         <div class="carousel-inner">
                             ${room.images.map((img, index) => `
                                 <div class="carousel-item ${index === initialIndex ? 'active' : ''}">
-                                    <img src="${img}" class="d-block w-100" alt="Room image ${index + 1}">
+                                    <img src="${img}" class="d-block" alt="Room image ${index + 1}">
                                 </div>
                             `).join('')}
                         </div>
