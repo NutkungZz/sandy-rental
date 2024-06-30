@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchRooms();
     fetchPayments();
 
-    // เพิ่ม event listener สำหรับปุ่ม logout
     document.getElementById('logoutBtn').addEventListener('click', logout);
 });
 
@@ -23,6 +22,7 @@ function fetchTenants() {
             tenants = data;
             displayTenants();
             populateTenantSelect();
+            displayRooms(); // เพิ่มการแสดงข้อมูลห้องเช่า
         })
         .catch(error => console.error('Error:', error));
 }
@@ -33,6 +33,7 @@ function fetchRooms() {
         .then(data => {
             rooms = data;
             populateRoomSelect();
+            displayRooms(); // เรียกฟังก์ชันแสดงข้อมูลห้องเช่า
         })
         .catch(error => console.error('Error:', error));
 }
@@ -67,6 +68,28 @@ function displayTenants() {
             </div>
         `;
         tenantList.innerHTML += tenantCard;
+    });
+}
+
+function displayRooms() {
+    const roomList = document.getElementById('roomList');
+    roomList.innerHTML = '';
+
+    rooms.forEach(room => {
+        const tenant = tenants.find(t => t.room_id === room.id);
+        const roomCard = `
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">ห้อง ${room.room_number}</h5>
+                    <p class="card-text">สถานะ: ${tenant ? 'มีผู้เช่า' : 'ว่าง'}</p>
+                    ${tenant ? `
+                        <p class="card-text">ผู้เช่า: ${tenant.name}</p>
+                        <p class="card-text">เบอร์โทร: ${tenant.phone}</p>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        roomList.innerHTML += roomCard;
     });
 }
 
@@ -137,8 +160,8 @@ document.getElementById('tenantForm').addEventListener('submit', function(e) {
         body: JSON.stringify(tenantData),
     })
     .then(response => response.json())
-    .then(data => {
-        fetchTenants();
+	.then(data => {
+        fetchTenants(); // This will update both tenants and rooms display
         document.getElementById('tenantForm').reset();
         new bootstrap.Modal(document.getElementById('addTenantModal')).hide();
     })
@@ -178,7 +201,7 @@ function editTenant(id) {
     const tenant = tenants.find(t => t.id === id);
     if (tenant) {
         document.getElementById('tenantId').value = tenant.id;
-		document.getElementById('roomId').value = tenant.room_id;
+        document.getElementById('roomId').value = tenant.room_id;
         document.getElementById('tenantName').value = tenant.name;
         document.getElementById('tenantPhone').value = tenant.phone;
         document.getElementById('tenantEmail').value = tenant.email;
@@ -228,7 +251,6 @@ function formatDate(dateString) {
     return `${day}/${month}/${year}`;
 }
 
-// เพิ่มฟังก์ชัน logout
 function logout() {
     localStorage.removeItem('user');
     window.location.href = 'index.html';
