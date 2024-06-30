@@ -38,6 +38,21 @@
             background-color: #28a745;
             color: #fff;
         }
+        .add-room-card {
+            border: 2px dashed #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .add-room-card:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+        .add-room-card i {
+            color: #007bff;
+        }
+        .add-room-card:hover i {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
@@ -190,7 +205,7 @@
         </div>
     </div>
 
-        <!-- Modal สำหรับเพิ่มห้องเช่า -->
+    <!-- Modal สำหรับเพิ่มห้องเช่า -->
     <div class="modal fade" id="addRoomModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
