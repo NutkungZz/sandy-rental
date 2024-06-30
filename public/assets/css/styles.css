@@ -188,15 +188,42 @@ body {
     transform: scale(1.05);
 }
 
-#fullImageModal .modal-body {
-    padding: 0;
-    background-color: rgba(0, 0, 0, 0.8);
+#fullImageModal .modal-dialog {
+    max-width: 90vw;
+    margin: 1.75rem auto;
 }
 
-#fullImageModal .img-fluid {
-    max-height: 90vh;
-    max-width: 90vw;
+#fullImageModal .modal-content {
+    background-color: transparent;
+    border: none;
+}
+
+#fullImageModal .modal-body {
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    height: 90vh;
+}
+
+#fullImageModal .carousel-item img {
+    max-height: 85vh;
+    max-width: 100%;
     object-fit: contain;
+}
+
+#fullImageModal .carousel-control-prev,
+#fullImageModal .carousel-control-next {
+    width: 10%;
+    opacity: 0.7;
+}
+
+#fullImageModal .carousel-control-prev-icon,
+#fullImageModal .carousel-control-next-icon {
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    padding: 20px;
 }
 
 @media (min-width: 768px) {
