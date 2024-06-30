@@ -137,6 +137,7 @@ function showRoomDetails(id) {
         ${room.latitude && room.longitude ? `
             <p><a href="https://www.google.com/maps?q=${room.latitude},${room.longitude}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-map-marker-alt"></i> ดูตำแหน่งบน Google Maps</a></p>
         ` : ''}
+        <h5 class="mt-4">รูปภาพห้อง</h5>
         ${imageGallery}
     `;
 
@@ -145,27 +146,29 @@ function showRoomDetails(id) {
 }
 
 function showFullImage(imageSrc) {
-    const fullImageModal = `
-        <div class="modal fade" id="fullImageModal" tabindex="-1">
-            <div class="modal-dialog modal-fullscreen">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body d-flex align-items-center justify-content-center">
-                        <img src="${imageSrc}" class="img-fluid" alt="Full size image">
-                    </div>
+    const fullImageModal = document.createElement('div');
+    fullImageModal.className = 'modal fade';
+    fullImageModal.id = 'fullImageModal';
+    fullImageModal.innerHTML = `
+        <div class="modal-dialog modal-fullscreen">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body d-flex align-items-center justify-content-center">
+                    <img src="${imageSrc}" class="img-fluid" alt="Full size image">
                 </div>
             </div>
         </div>
     `;
-    document.body.insertAdjacentHTML('beforeend', fullImageModal);
-    const modal = new bootstrap.Modal(document.getElementById('fullImageModal'));
+    document.body.appendChild(fullImageModal);
+    const modal = new bootstrap.Modal(fullImageModal);
     modal.show();
-    document.getElementById('fullImageModal').addEventListener('hidden.bs.modal', function () {
+    fullImageModal.addEventListener('hidden.bs.modal', function () {
         this.remove();
     });
 }
+
 function showError(message) {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = `<div class="alert alert-danger" role="alert">${message}</div>`;
