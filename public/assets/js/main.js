@@ -118,6 +118,7 @@ function showRoomDetails(id) {
     let imageGallery = '';
     if (room.images && room.images.length > 0) {
         imageGallery = `
+            <h5 class="mt-4">รูปภาพห้อง</h5>
             <div class="image-gallery">
                 ${room.images.map((img, index) => `
                     <img src="${img}" alt="Room ${room.room_number} Image ${index + 1}" 
@@ -137,28 +138,11 @@ function showRoomDetails(id) {
         ${room.latitude && room.longitude ? `
             <p><a href="https://www.google.com/maps?q=${room.latitude},${room.longitude}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-map-marker-alt"></i> ดูตำแหน่งบน Google Maps</a></p>
         ` : ''}
-        <h5 class="mt-4">รูปภาพห้อง</h5>
         ${imageGallery}
     `;
 
     document.getElementById('roomDetailContent').innerHTML = detailContent;
     new bootstrap.Modal(document.getElementById('roomDetailModal')).show();
-}
-
-function preloadImages(urls, allImagesLoadedCallback) {
-    let loadedCounter = 0;
-    const totalImages = urls.length;
-
-    urls.forEach((url) => {
-        const img = new Image();
-        img.onload = img.onerror = () => {
-            loadedCounter++;
-            if (loadedCounter === totalImages) {
-                allImagesLoadedCallback();
-            }
-        };
-        img.src = url;
-    });
 }
 
 function showFullImage(roomId, initialIndex) {
@@ -169,15 +153,15 @@ function showFullImage(roomId, initialIndex) {
     fullImageModal.className = 'modal fade';
     fullImageModal.id = 'fullImageModal';
     fullImageModal.innerHTML = `
-        <div class="modal-dialog modal-dialog-centered modal-fullscreen">
+        <div class="modal-dialog modal-fullscreen">
             <div class="modal-content">
-                <div class="modal-body">
+                <div class="modal-body p-0">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <div id="fullImageCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="false">
+                    <div id="fullImageCarousel" class="carousel slide" data-bs-ride="carousel">
                         <div class="carousel-inner">
                             ${room.images.map((img, index) => `
                                 <div class="carousel-item ${index === initialIndex ? 'active' : ''}">
-                                    <img src="${img}" class="d-block" alt="Room image ${index + 1}" style="opacity: 0;">
+                                    <img src="${img}" class="d-block w-100 h-100" alt="Room image ${index + 1}">
                                 </div>
                             `).join('')}
                         </div>
@@ -195,25 +179,10 @@ function showFullImage(roomId, initialIndex) {
         </div>
     `;
     document.body.appendChild(fullImageModal);
-
-    preloadImages(room.images, () => {
-        const modal = new bootstrap.Modal(fullImageModal);
-        modal.show();
-        document.querySelectorAll('#fullImageCarousel img').forEach(img => {
-            img.style.opacity = '1';
-        });
-    });
-
+    const modal = new bootstrap.Modal(fullImageModal);
+    modal.show();
     fullImageModal.addEventListener('hidden.bs.modal', function () {
         this.remove();
-    });
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'ArrowLeft') {
-            document.querySelector('#fullImageCarousel .carousel-control-prev').click();
-        } else if (e.key === 'ArrowRight') {
-            document.querySelector('#fullImageCarousel .carousel-control-next').click();
-        }
     });
 }
 
