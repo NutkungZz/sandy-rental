@@ -77,15 +77,31 @@ function displayRooms() {
 
     rooms.forEach(room => {
         const tenant = tenants.find(t => t.room_id === room.id);
+        const status = tenant ? 'มีผู้เช่า' : 'ว่าง';
+        const statusClass = tenant ? 'status-occupied' : 'status-vacant';
+
         const roomCard = `
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">ห้อง ${room.room_number}</h5>
-                    <p class="card-text">สถานะ: ${tenant ? 'มีผู้เช่า' : 'ว่าง'}</p>
-                    ${tenant ? `
-                        <p class="card-text">ผู้เช่า: ${tenant.name}</p>
-                        <p class="card-text">เบอร์โทร: ${tenant.phone}</p>
-                    ` : ''}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">ห้อง ${room.room_number}</h5>
+                        <p class="card-text">
+                            <span class="status-badge ${statusClass}">${status}</span>
+                        </p>
+                        <p class="card-text">ราคา: ${room.price} บาท/เดือน</p>
+                        ${tenant ? `
+                            <p class="card-text">ผู้เช่า: ${tenant.name}</p>
+                            <p class="card-text">เบอร์โทร: ${tenant.phone}</p>
+                        ` : ''}
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-primary btn-edit" onclick="editRoom(${room.id})">
+                                <i class="fas fa-edit"></i> แก้ไข
+                            </button>
+                            <button class="btn btn-sm btn-danger btn-delete" onclick="deleteRoom(${room.id})">
+                                <i class="fas fa-trash"></i> ลบ
+                            </button>
+			</div>
+                    </div>
                 </div>
             </div>
         `;
@@ -160,7 +176,7 @@ document.getElementById('tenantForm').addEventListener('submit', function(e) {
         body: JSON.stringify(tenantData),
     })
     .then(response => response.json())
-	.then(data => {
+    .then(data => {
         fetchTenants(); // This will update both tenants and rooms display
         document.getElementById('tenantForm').reset();
         new bootstrap.Modal(document.getElementById('addTenantModal')).hide();
@@ -244,6 +260,50 @@ function deletePayment(id) {
             .catch(error => console.error('Error:', error));
     }
 }
+
+function editRoom(id) {
+    const room = rooms.find(r => r.id === id);
+    if (room) {
+        document.getElementById('editRoomId').value = room.id;
+        document.getElementById('editRoomNumber').value = room.room_number;
+        document.getElementById('editRoomPrice').value = room.price;
+        new bootstrap.Modal(document.getElementById('editRoomModal')).show();
+    }
+}
+
+function deleteRoom(id) {
+    if (confirm('คุณแน่ใจหรือไม่ที่จะลบห้องเช่านี้?')) {
+        fetch(`/api/rooms/${id}`, { method: 'DELETE' })
+            .then(response => response.json())
+            .then(data => {
+                fetchRooms();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+}
+
+document.getElementById('editRoomForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const roomData = {
+        id: document.getElementById('editRoomId').value,
+        room_number: document.getElementById('editRoomNumber').value,
+        price: document.getElementById('editRoomPrice').value
+    };
+
+    fetch(`/api/rooms/${roomData.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(roomData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        fetchRooms();
+        new bootstrap.Modal(document.getElementById('editRoomModal')).hide();
+    })
+    .catch(error => console.error('Error:', error));
+});
 
 function formatDate(dateString) {
     if (!dateString) return '';
