@@ -190,12 +190,20 @@ body {
 
 #fullImageModal .modal-dialog {
     max-width: 90vw;
-    margin: 1.75rem auto;
+    max-height: 90vh;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #fullImageModal .modal-content {
     background-color: transparent;
     border: none;
+    height: auto;
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 #fullImageModal .modal-body {
@@ -204,12 +212,23 @@ body {
     justify-content: center;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.8);
-    height: 90vh;
+    height: auto;
+}
+
+#fullImageModal .carousel {
+    width: 100%;
+    height: 100%;
+}
+
+#fullImageModal .carousel-item {
+    text-align: center;
 }
 
 #fullImageModal .carousel-item img {
-    max-height: 85vh;
     max-width: 100%;
+    max-height: 85vh;
+    width: auto;
+    height: auto;
     object-fit: contain;
 }
 
@@ -224,6 +243,15 @@ body {
     background-color: rgba(0, 0, 0, 0.5);
     border-radius: 50%;
     padding: 20px;
+}
+
+#fullImageModal .btn-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1050;
+    background-color: white;
+    opacity: 0.7;
 }
 
 @media (min-width: 768px) {
