@@ -103,8 +103,6 @@ function displayRooms(rooms) {
     });
 }
 
-// ฟังก์ชันอื่นๆ ยังคงเหมือนเดิม...
-
 function showRoomDetails(id) {
     const room = roomsData.find(r => r.id === id);
     if (!room) {
