@@ -118,10 +118,10 @@ function showRoomDetails(id) {
     let imageGallery = '';
     if (room.images && room.images.length > 0) {
         imageGallery = `
-            <div class="image-gallery mt-3">
+            <div class="image-gallery">
                 ${room.images.map((img, index) => `
                     <img src="${img}" alt="Room ${room.room_number} Image ${index + 1}" 
-                         class="gallery-thumbnail" onclick="showFullImage('${img}')">
+                         class="gallery-thumbnail" onclick="showFullImage(${id}, ${index})">
                 `).join('')}
             </div>
         `;
@@ -145,18 +145,34 @@ function showRoomDetails(id) {
     new bootstrap.Modal(document.getElementById('roomDetailModal')).show();
 }
 
-function showFullImage(imageSrc) {
+function showFullImage(roomId, initialIndex) {
+    const room = roomsData.find(r => r.id === roomId);
+    if (!room || !room.images || room.images.length === 0) return;
+
     const fullImageModal = document.createElement('div');
     fullImageModal.className = 'modal fade';
     fullImageModal.id = 'fullImageModal';
     fullImageModal.innerHTML = `
-        <div class="modal-dialog modal-fullscreen">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body d-flex align-items-center justify-content-center">
-                    <img src="${imageSrc}" class="img-fluid" alt="Full size image">
+                <div class="modal-body">
+                    <div id="fullImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            ${room.images.map((img, index) => `
+                                <div class="carousel-item ${index === initialIndex ? 'active' : ''}">
+                                    <img src="${img}" class="d-block img-fluid" alt="Room image ${index + 1}">
+                                </div>
+                            `).join('')}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#fullImageCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#fullImageCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
