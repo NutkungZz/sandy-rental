@@ -170,57 +170,49 @@ body {
 }
 
 .image-gallery {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 10px;
-    justify-content: start;
+    margin-top: 15px;
 }
 
 .gallery-thumbnail {
-    width: 100px;
+    width: 100%;
     height: 100px;
     object-fit: cover;
     cursor: pointer;
     transition: transform 0.3s ease;
+    border-radius: 5px;
 }
 
 .gallery-thumbnail:hover {
     transform: scale(1.05);
 }
 
-#fullImageModal .modal-dialog {
-    width: 100%;
-    max-width: none;
-    height: 100%;
-    margin: 0;
-}
-
 #fullImageModal .modal-content {
-    height: 100%;
-    border: none;
-    border-radius: 0;
-    background: rgba(0, 0, 0, 0.9);
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
-#fullImageModal .modal-body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    height: 100%;
+#fullImageModal .btn-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 1050;
+    background-color: white;
+    opacity: 0.7;
+    font-size: 1.5rem;
+    padding: 5px;
+    border-radius: 50%;
 }
 
-#fullImageModal .carousel,
-#fullImageModal .carousel-inner,
 #fullImageModal .carousel-item {
-    height: 100%;
+    height: 100vh;
 }
 
 #fullImageModal .carousel-item img {
-    max-width: 100%;
-    max-height: 100%;
     object-fit: contain;
-    transition: opacity 0.3s ease;
+    height: 100%;
+    width: 100%;
 }
 
 #fullImageModal .carousel-control-prev,
@@ -231,28 +223,11 @@ body {
 
 #fullImageModal .carousel-control-prev-icon,
 #fullImageModal .carousel-control-next-icon {
-    width: 40px;
-    height: 40px;
-}
-
-#fullImageModal .btn-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    z-index: 1050;
-    background: white;
-    opacity: 0.7;
-    font-size: 2rem;
-    padding: 0;
-    margin: 0;
-    width: 40px;
-    height: 40px;
+    background-color: rgba(255, 255, 255, 0.5);
     border-radius: 50%;
-    transition: opacity 0.3s ease;
-}
-
-#fullImageModal .btn-close:hover {
-    opacity: 1;
+    width: 40px;
+    height: 40px;
+    background-size: 20px;
 }
 
 @media (min-width: 768px) {
