@@ -35,38 +35,21 @@ function displayRooms(rooms) {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = '';
 
-    if (rooms.length === 0) {
-        roomList.innerHTML = '<p>ไม่พบข้อมูลห้องพัก</p>';
-        return;
-    }
-
     rooms.forEach(room => {
-        let carouselItems = '';
-        let carouselIndicators = '';
-        if (room.images && room.images.length > 0) {
-            room.images.forEach((image, i) => {
-                carouselItems += `
-                    <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                        <img src="${image}" class="d-block w-100" alt="Room ${room.room_number} Image ${i+1}">
-                    </div>
-                `;
-                carouselIndicators += `
-                    <button type="button" data-bs-target="#carousel${room.id}" data-bs-slide-to="${i}" 
-                        ${i === 0 ? 'class="active" aria-current="true"' : ''} aria-label="Slide ${i+1}"></button>
-                `;
-            });
-        }
+        const status = room.status || 'ว่าง'; // ใช้ค่าเริ่มต้นเป็น 'ว่าง' ถ้าไม่มีข้อมูล
+        const statusClass = status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied';
 
         const roomCard = `
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card room-card">
                     ${room.images && room.images.length > 0 ? `
                         <div id="carousel${room.id}" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-indicators">
-                                ${carouselIndicators}
-                            </div>
                             <div class="carousel-inner">
-                                ${carouselItems}
+                                ${room.images.map((img, index) => `
+                                    <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                                        <img src="${img}" class="d-block w-100" alt="Room ${room.room_number}">
+                                    </div>
+                                `).join('')}
                             </div>
                             ${room.images.length > 1 ? `
                                 <button class="carousel-control-prev" type="button" data-bs-target="#carousel${room.id}" data-bs-slide="prev">
@@ -82,8 +65,8 @@ function displayRooms(rooms) {
                     ` : ''}
                     <div class="card-body">
                         <h5 class="card-title">${room.room_number}</h5>
-                        <p class="card-text ${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">
-                            สถานะ: ${room.status}
+                        <p class="card-text ${statusClass}">
+                            สถานะ: ${status}
                         </p>
                         <p class="card-text">ราคา: ฿${room.price.toLocaleString()} / เดือน</p>
                         <p class="card-text">ขนาด: ${room.size || 'ไม่ระบุ'} ตร.ม.</p>
