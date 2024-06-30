@@ -10,28 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('maxPrice').addEventListener('input', filterRooms);
     
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
-
-    const adminLoginButton = document.querySelector('.btn-admin');
-    if (adminLoginButton) {
-        adminLoginButton.addEventListener('click', showLoginModal);
-    }
-
-    // เพิ่มการตรวจสอบ token เมื่อโหลดหน้า
-    const token = localStorage.getItem('token');
-    if (!token && window.location.pathname.includes('admin.html')) {
-        // ถ้าไม่มี token และพยายามเข้าถึง admin.html โดยตรง ให้ redirect กลับไปที่ index.html
-        window.location.href = 'index.html';
-    }
-
-    // เพิ่มการจัดการ event เมื่อ modal ถูกปิด
-    const loginModal = document.getElementById('loginModal');
-    loginModal.addEventListener('hidden.bs.modal', function () {
-        document.body.classList.remove('modal-open');
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.remove();
-        }
-    });
 });
 
 function fetchRooms() {
@@ -56,55 +34,62 @@ function fetchRooms() {
 function displayRooms(rooms) {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = '';
-    
+
     if (rooms.length === 0) {
         roomList.innerHTML = '<p>ไม่พบข้อมูลห้องพัก</p>';
         return;
     }
 
-    rooms.forEach((room, index) => {
+    rooms.forEach(room => {
         let carouselItems = '';
         let carouselIndicators = '';
-        room.images.forEach((image, i) => {
-            carouselItems += `
-                <div class="carousel-item ${i === 0 ? 'active' : ''}">
-                    <img src="${image}" class="d-block w-100" alt="Room ${room.room_number} Image ${i+1}">
-                </div>
-            `;
-            carouselIndicators += `
-                <button type="button" data-bs-target="#carousel${index}" data-bs-slide-to="${i}" 
-                    ${i === 0 ? 'class="active" aria-current="true"' : ''} aria-label="Slide ${i+1}"></button>
-            `;
-        });
+        if (room.images && room.images.length > 0) {
+            room.images.forEach((image, i) => {
+                carouselItems += `
+                    <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                        <img src="${image}" class="d-block w-100" alt="Room ${room.room_number} Image ${i+1}">
+                    </div>
+                `;
+                carouselIndicators += `
+                    <button type="button" data-bs-target="#carousel${room.id}" data-bs-slide-to="${i}" 
+                        ${i === 0 ? 'class="active" aria-current="true"' : ''} aria-label="Slide ${i+1}"></button>
+                `;
+            });
+        }
 
         const roomCard = `
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="card room-card">
-                    <div id="carousel${index}" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-indicators">
-                            ${carouselIndicators}
+                    ${room.images && room.images.length > 0 ? `
+                        <div id="carousel${room.id}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                ${carouselIndicators}
+                            </div>
+                            <div class="carousel-inner">
+                                ${carouselItems}
+                            </div>
+                            ${room.images.length > 1 ? `
+                                <button class="carousel-control-prev" type="button" data-bs-target="#carousel${room.id}" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#carousel${room.id}" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            ` : ''}
                         </div>
-                        <div class="carousel-inner">
-                            ${carouselItems}
-                        </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel${index}" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Previous</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carousel${index}" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Next</span>
-                        </button>
-                    </div>
+                    ` : ''}
                     <div class="card-body">
                         <h5 class="card-title">${room.room_number}</h5>
                         <p class="card-text ${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">
                             สถานะ: ${room.status}
                         </p>
-                        <p class="price">฿${room.price.toLocaleString()} / เดือน</p>
+                        <p class="card-text">ราคา: ฿${room.price.toLocaleString()} / เดือน</p>
+                        <p class="card-text">ขนาด: ${room.size || 'ไม่ระบุ'} ตร.ม.</p>
                     </div>
                     <div class="card-footer">
-                        <button class="btn btn-primary btn-sm" onclick="showRoomDetails(${index})">ดูรายละเอียด</button>
+                        <button class="btn btn-primary btn-sm" onclick="showRoomDetails(${room.id})">ดูรายละเอียด</button>
                     </div>
                 </div>
             </div>
@@ -141,33 +126,24 @@ function filterRooms() {
     }
 }
 
-function showRoomDetails(index) {
-    const room = roomsData[index];
-    const amenitiesList = room.amenities.join(', ');
+function showRoomDetails(id) {
+    const room = roomsData.find(r => r.id === id);
+    const amenitiesList = room.amenities ? room.amenities.join(', ') : 'ไม่มีข้อมูล';
 
     const detailContent = `
         <h4 class="mb-3">${room.room_number}</h4>
         <p><strong>ราคา:</strong> ฿${room.price.toLocaleString()} / เดือน</p>
         <p><strong>สถานะ:</strong> <span class="${room.status.toLowerCase() === 'ว่าง' ? 'status-available' : 'status-occupied'}">${room.status}</span></p>
-        <p><strong>ขนาดห้อง:</strong> ${room.size}</p>
+        <p><strong>ขนาดห้อง:</strong> ${room.size || 'ไม่ระบุ'} ตร.ม.</p>
         <p><strong>สิ่งอำนวยความสะดวก:</strong> ${amenitiesList}</p>
-        <p><strong>รายละเอียด:</strong> ${room.description}</p>
-        <h5 class="mt-4 mb-2">ประวัติการเช่า</h5>
-        <ul class="list-unstyled">
-            <li><strong>วันที่เริ่มต้น:</strong> ${formatDate(room.rental_start)}</li>
-            <li><strong>วันที่สิ้นสุด:</strong> ${formatDate(room.rental_end)}</li>
-        </ul>
-        <p><a href="https://www.google.com/maps?q=${room.latitude},${room.longitude}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-map-marker-alt"></i> ดูตำแหน่งบน Google Maps</a></p>
+        <p><strong>รายละเอียด:</strong> ${room.description || 'ไม่มีข้อมูล'}</p>
+        ${room.latitude && room.longitude ? `
+            <p><a href="https://www.google.com/maps?q=${room.latitude},${room.longitude}" target="_blank" class="btn btn-primary btn-sm"><i class="fas fa-map-marker-alt"></i> ดูตำแหน่งบน Google Maps</a></p>
+        ` : ''}
     `;
 
     document.getElementById('roomDetailContent').innerHTML = detailContent;
     new bootstrap.Modal(document.getElementById('roomDetailModal')).show();
-}
-
-function formatDate(dateString) {
-    if (!dateString || dateString === '9999-12-31') return 'ไม่ระบุ';
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
 }
 
 function showError(message) {
@@ -175,16 +151,11 @@ function showError(message) {
     roomList.innerHTML = `<div class="alert alert-danger" role="alert">${message}</div>`;
 }
 
-function showLoginModal() {
-    const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
-    loginModal.show();
-}
-
 function handleLogin(e) {
     e.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-
+    
     fetch('/api/login', {
         method: 'POST',
         headers: {
@@ -195,7 +166,6 @@ function handleLogin(e) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             window.location.href = 'admin.html';
         } else {
@@ -206,31 +176,4 @@ function handleLogin(e) {
         console.error('Error:', error);
         alert('เกิดข้อผิดพลาดในการเข้าสู่ระบบ');
     });
-}
-
-function handleRegister(e) {
-  e.preventDefault();
-  const email = document.getElementById('registerEmail').value;
-  const password = document.getElementById('registerPassword').value;
-
-  fetch('/api/register', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ email, password }),
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('ลงทะเบียนสำเร็จ');
-      // ทำการ login อัตโนมัติหรือนำผู้ใช้ไปยังหน้า login
-    } else {
-      alert(data.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('เกิดข้อผิดพลาดในการลงทะเบียน');
-  });
 }
