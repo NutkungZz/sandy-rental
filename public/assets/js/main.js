@@ -115,7 +115,41 @@ function showRoomDetails(id) {
     
     const amenitiesList = room.amenities ? room.amenities.join(', ') : 'ไม่มีข้อมูล';
 
+    let imagesCarousel = '';
+    if (room.images && room.images.length > 0) {
+        const carouselItems = room.images.map((img, index) => `
+            <div class="carousel-item ${index === 0 ? 'active' : ''}">
+                <img src="${img}" class="d-block w-100" alt="Room ${room.room_number} Image ${index + 1}">
+            </div>
+        `).join('');
+
+        const carouselIndicators = room.images.map((img, index) => `
+            <button type="button" data-bs-target="#roomDetailCarousel" data-bs-slide-to="${index}" 
+                ${index === 0 ? 'class="active" aria-current="true"' : ''} aria-label="Slide ${index + 1}"></button>
+        `).join('');
+
+        imagesCarousel = `
+            <div id="roomDetailCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    ${carouselIndicators}
+                </div>
+                <div class="carousel-inner">
+                    ${carouselItems}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#roomDetailCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#roomDetailCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        `;
+    }
+
     const detailContent = `
+        ${imagesCarousel}
         <h4 class="mb-3">${room.room_number}</h4>
         <p><strong>ราคา:</strong> ฿${room.price.toLocaleString()} / เดือน</p>
         <p><strong>สถานะ:</strong> <span class="${statusClass}">${status}</span></p>
