@@ -145,6 +145,22 @@ function showRoomDetails(id) {
     new bootstrap.Modal(document.getElementById('roomDetailModal')).show();
 }
 
+function preloadImages(urls, allImagesLoadedCallback) {
+    let loadedCounter = 0;
+    const totalImages = urls.length;
+
+    urls.forEach((url) => {
+        const img = new Image();
+        img.onload = img.onerror = () => {
+            loadedCounter++;
+            if (loadedCounter === totalImages) {
+                allImagesLoadedCallback();
+            }
+        };
+        img.src = url;
+    });
+}
+
 function showFullImage(roomId, initialIndex) {
     const room = roomsData.find(r => r.id === roomId);
     if (!room || !room.images || room.images.length === 0) return;
@@ -153,7 +169,7 @@ function showFullImage(roomId, initialIndex) {
     fullImageModal.className = 'modal fade';
     fullImageModal.id = 'fullImageModal';
     fullImageModal.innerHTML = `
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen">
             <div class="modal-content">
                 <div class="modal-body">
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -161,7 +177,7 @@ function showFullImage(roomId, initialIndex) {
                         <div class="carousel-inner">
                             ${room.images.map((img, index) => `
                                 <div class="carousel-item ${index === initialIndex ? 'active' : ''}">
-                                    <img src="${img}" class="d-block" alt="Room image ${index + 1}">
+                                    <img src="${img}" class="d-block" alt="Room image ${index + 1}" style="opacity: 0;">
                                 </div>
                             `).join('')}
                         </div>
@@ -179,13 +195,19 @@ function showFullImage(roomId, initialIndex) {
         </div>
     `;
     document.body.appendChild(fullImageModal);
-    const modal = new bootstrap.Modal(fullImageModal);
-    modal.show();
+
+    preloadImages(room.images, () => {
+        const modal = new bootstrap.Modal(fullImageModal);
+        modal.show();
+        document.querySelectorAll('#fullImageCarousel img').forEach(img => {
+            img.style.opacity = '1';
+        });
+    });
+
     fullImageModal.addEventListener('hidden.bs.modal', function () {
         this.remove();
     });
 
-    // เพิ่มการสนับสนุนการเลื่อนรูปด้วยปุ่มลูกศร
     document.addEventListener('keydown', function(e) {
         if (e.key === 'ArrowLeft') {
             document.querySelector('#fullImageCarousel .carousel-control-prev').click();
