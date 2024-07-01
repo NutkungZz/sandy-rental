@@ -95,7 +95,7 @@ module.exports = async (req, res) => {
                 
                 if (error) throw error;
 
-                // Update room status to vacant
+                // Update room status to ว่าง
                 if (tenantData && tenantData.room_id) {
                     await supabase
                         .from('rooms')
