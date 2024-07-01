@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchPayments();
 
     document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.getElementById('addTenantForm').addEventListener('submit', handleAddTenant);
+    document.getElementById('tenantForm').addEventListener('submit', handleAddTenant);
 });
 
 function fetchTenants() {
@@ -136,7 +136,7 @@ function populateRoomSelect() {
     const roomSelect = document.getElementById('roomId');
     roomSelect.innerHTML = '<option value="">เลือกห้อง</option>';
     rooms.forEach(room => {
-        if (!room.tenant) {
+        if (!tenants.some(tenant => tenant.room_id === room.id)) {
             const option = document.createElement('option');
             option.value = room.id;
             option.textContent = `ห้อง ${room.room_number}`;
@@ -158,14 +158,21 @@ function populateTenantSelect() {
 
 function handleAddTenant(e) {
     e.preventDefault();
+    const tenantId = document.getElementById('tenantId').value;
     const tenantData = {
         name: document.getElementById('tenantName').value,
         phone: document.getElementById('tenantPhone').value,
         email: document.getElementById('tenantEmail').value,
         room_id: document.getElementById('roomId').value,
-        move_in_date: document.getElementById('moveInDate').value
+        move_in_date: document.getElementById('moveInDate').value,
+        move_out_date: document.getElementById('moveOutDate').value || null
     };
-    addTenant(tenantData);
+
+    if (tenantId) {
+        updateTenant(tenantId, tenantData);
+    } else {
+        addTenant(tenantData);
+    }
 }
 
 function addTenant(tenantData) {
@@ -184,11 +191,35 @@ function addTenant(tenantData) {
         const modal = bootstrap.Modal.getInstance(document.getElementById('addTenantModal'));
         modal.hide();
         showAlert('เพิ่มผู้เช่าสำเร็จ', 'ข้อมูลผู้เช่าใหม่ได้รับการบันทึกเรียบร้อยแล้ว', 'success');
-        document.getElementById('addTenantForm').reset();
+        resetTenantForm();
     })
     .catch(error => {
         console.error('Error adding tenant:', error);
         showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถเพิ่มผู้เช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
+    });
+}
+
+function updateTenant(id, tenantData) {
+    fetch(`/api/tenants/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tenantData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Tenant updated successfully:', data);
+        fetchTenants();
+        fetchRooms();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addTenantModal'));
+        modal.hide();
+        showAlert('แก้ไขข้อมูลสำเร็จ', 'ข้อมูลผู้เช่าได้รับการปรับปรุงเรียบร้อยแล้ว', 'success');
+        resetTenantForm();
+    })
+    .catch(error => {
+        console.error('Error updating tenant:', error);
+        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถแก้ไขข้อมูลผู้เช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
     });
 }
 
@@ -202,6 +233,10 @@ function editTenant(id) {
         document.getElementById('tenantEmail').value = tenant.email;
         document.getElementById('moveInDate').value = tenant.move_in_date;
         document.getElementById('moveOutDate').value = tenant.move_out_date || '';
+        
+        document.querySelector('#addTenantModal .modal-title').textContent = 'แก้ไขข้อมูลผู้เช่า';
+        document.querySelector('#addTenantModal button[type="submit"]').textContent = 'บันทึกการแก้ไข';
+        
         new bootstrap.Modal(document.getElementById('addTenantModal')).show();
     }
 }
@@ -220,6 +255,13 @@ function deleteTenant(id) {
                 showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลผู้เช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
             });
     }
+}
+
+function resetTenantForm() {
+    document.getElementById('tenantId').value = '';
+    document.getElementById('tenantForm').reset();
+    document.querySelector('#addTenantModal .modal-title').textContent = 'เพิ่มผู้เช่าใหม่';
+    document.querySelector('#addTenantModal button[type="submit"]').textContent = 'บันทึก';
 }
 
 function editRoom(id) {
