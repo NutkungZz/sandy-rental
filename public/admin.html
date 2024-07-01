@@ -78,7 +78,17 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTenantModal">เพิ่มผู้เช่าใหม่</button>
             </div>
             <div class="tab-pane fade" id="rooms" role="tabpanel">
-                <div id="roomList" class="row"></div>
+                <div id="roomList" class="row">
+                    <!-- ปุ่มเพิ่มห้องเช่าใหม่ -->
+                    <div class="col-md-4 mb-3">
+                        <div class="card add-room-card h-100" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                <i class="fas fa-plus fa-3x mb-3"></i>
+                                <h5 class="card-title text-center">เพิ่มห้องเช่าใหม่</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="tab-pane fade" id="payments" role="tabpanel">
                 <div id="paymentList"></div>
@@ -88,49 +98,49 @@
     </div>
 
     <!-- Modal สำหรับเพิ่ม/แก้ไขผู้เช่า -->
-        <div class="modal fade" id="addTenantModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">เพิ่มผู้เช่าใหม่</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="tenantForm">
-                            <input type="hidden" id="tenantId">
-                            <!-- ฟิลด์สำหรับข้อมูลผู้เช่า -->
-                            <div class="mb-3">
-                                <label for="roomId" class="form-label">หมายเลขห้อง</label>
-                                <select class="form-select" id="roomId" required>
-                                    <!-- ตัวเลือกห้องจะถูกเพิ่มด้วย JavaScript -->
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tenantName" class="form-label">ชื่อผู้เช่า</label>
-                                <input type="text" class="form-control" id="tenantName" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tenantPhone" class="form-label">เบอร์โทรศัพท์</label>
-                                <input type="tel" class="form-control" id="tenantPhone" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="tenantEmail" class="form-label">อีเมล</label>
-                                <input type="email" class="form-control" id="tenantEmail" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="moveInDate" class="form-label">วันที่เข้าอยู่</label>
-                                <input type="date" class="form-control" id="moveInDate" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="moveOutDate" class="form-label">วันที่ย้ายออก</label>
-                                <input type="date" class="form-control" id="moveOutDate">
-                            </div>
-                            <button type="submit" class="btn btn-primary">บันทึก</button>
-                        </form>
-                    </div>
+    <div class="modal fade" id="addTenantModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">เพิ่มผู้เช่าใหม่</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="tenantForm">
+                        <input type="hidden" id="tenantId">
+                        <!-- ฟิลด์สำหรับข้อมูลผู้เช่า -->
+                        <div class="mb-3">
+                            <label for="roomId" class="form-label">หมายเลขห้อง</label>
+                            <select class="form-select" id="roomId" required>
+                                <!-- ตัวเลือกห้องจะถูกเพิ่มด้วย JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tenantName" class="form-label">ชื่อผู้เช่า</label>
+                            <input type="text" class="form-control" id="tenantName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tenantPhone" class="form-label">เบอร์โทรศัพท์</label>
+                            <input type="tel" class="form-control" id="tenantPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="tenantEmail" class="form-label">อีเมล</label>
+                            <input type="email" class="form-control" id="tenantEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="moveInDate" class="form-label">วันที่เข้าอยู่</label>
+                            <input type="date" class="form-control" id="moveInDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="moveOutDate" class="form-label">วันที่ย้ายออก</label>
+                            <input type="date" class="form-control" id="moveOutDate">
+                        </div>
+                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                    </form>
                 </div>
             </div>
         </div>
+    </div>
     
     <!-- Modal สำหรับบันทึกการชำระเงิน -->
     <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
