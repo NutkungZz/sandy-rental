@@ -60,12 +60,12 @@ module.exports = async (req, res) => {
                 if (req.body.oldRoomId && req.body.oldRoomId !== room_id) {
                     await supabase
                         .from('rooms')
-                        .update({ status: 'vacant' })
+                        .update({ status: 'ว่าง' })
                         .eq('id', req.body.oldRoomId);
 
                     await supabase
                         .from('rooms')
-                        .update({ status: 'occupied' })
+                        .update({ status: 'มีผู้เช่า' })
                         .eq('id', room_id);
                 }
 
@@ -99,7 +99,7 @@ module.exports = async (req, res) => {
                 if (tenantData && tenantData.room_id) {
                     await supabase
                         .from('rooms')
-                        .update({ status: 'vacant' })
+                        .update({ status: 'ว่าง' })
                         .eq('id', tenantData.room_id);
                 }
 
