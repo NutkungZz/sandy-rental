@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
                 // Update room status
                 await supabase
                     .from('rooms')
-                    .update({ status: 'occupied' })
+                    .update({ status: 'มีผู้เช่า' })
                     .eq('id', room_id);
 
                 res.status(201).json(data);
