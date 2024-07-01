@@ -13,7 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchPayments();
 
     document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.getElementById('tenantForm').addEventListener('submit', handleAddTenant);
+    document.getElementById('addTenantForm').addEventListener('submit', handleAddTenant);
+    document.getElementById('editTenantForm').addEventListener('submit', handleEditTenant);
+    document.getElementById('addRoomForm').addEventListener('submit', handleAddRoom);
+    document.getElementById('editRoomForm').addEventListener('submit', handleEditRoom);
+    document.getElementById('paymentForm').addEventListener('submit', handleAddPayment);
 });
 
 function fetchTenants() {
@@ -75,6 +79,19 @@ function displayRooms() {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = '';
 
+    // เพิ่มการ์ดสำหรับเพิ่มห้องใหม่
+    const addRoomCard = `
+        <div class="col-md-4 mb-3">
+            <div class="card add-room-card h-100" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-plus fa-3x mb-3"></i>
+                    <h5 class="card-title text-center">เพิ่มห้องเช่าใหม่</h5>
+                </div>
+            </div>
+        </div>
+    `;
+    roomList.innerHTML = addRoomCard;
+
     rooms.forEach(room => {
         const tenant = tenants.find(t => t.room_id === room.id);
         const status = tenant ? 'มีผู้เช่า' : 'ว่าง';
@@ -133,7 +150,7 @@ function displayPayments() {
 }
 
 function populateRoomSelect() {
-    const roomSelect = document.getElementById('roomId');
+    const roomSelect = document.getElementById('addRoomId');
     roomSelect.innerHTML = '<option value="">เลือกห้อง</option>';
     rooms.forEach(room => {
         if (!tenants.some(tenant => tenant.room_id === room.id)) {
@@ -158,24 +175,14 @@ function populateTenantSelect() {
 
 function handleAddTenant(e) {
     e.preventDefault();
-    const tenantId = document.getElementById('tenantId').value;
     const tenantData = {
-        name: document.getElementById('tenantName').value,
-        phone: document.getElementById('tenantPhone').value,
-        email: document.getElementById('tenantEmail').value,
-        room_id: document.getElementById('roomId').value,
-        move_in_date: document.getElementById('moveInDate').value,
-        move_out_date: document.getElementById('moveOutDate').value || null
+        name: document.getElementById('addTenantName').value,
+        phone: document.getElementById('addTenantPhone').value,
+        email: document.getElementById('addTenantEmail').value,
+        room_id: document.getElementById('addRoomId').value,
+        move_in_date: document.getElementById('addMoveInDate').value,
     };
 
-    if (tenantId) {
-        updateTenant(tenantId, tenantData);
-    } else {
-        addTenant(tenantData);
-    }
-}
-
-function addTenant(tenantData) {
     fetch('/api/tenants', {
         method: 'POST',
         headers: {
@@ -191,7 +198,7 @@ function addTenant(tenantData) {
         const modal = bootstrap.Modal.getInstance(document.getElementById('addTenantModal'));
         modal.hide();
         showAlert('เพิ่มผู้เช่าสำเร็จ', 'ข้อมูลผู้เช่าใหม่ได้รับการบันทึกเรียบร้อยแล้ว', 'success');
-        resetTenantForm();
+        document.getElementById('addTenantForm').reset();
     })
     .catch(error => {
         console.error('Error adding tenant:', error);
@@ -199,8 +206,18 @@ function addTenant(tenantData) {
     });
 }
 
-function updateTenant(id, tenantData) {
-    fetch(`/api/tenants/${id}`, {
+function handleEditTenant(e) {
+    e.preventDefault();
+    const tenantId = document.getElementById('editTenantId').value;
+    const tenantData = {
+        name: document.getElementById('editTenantName').value,
+        phone: document.getElementById('editTenantPhone').value,
+        email: document.getElementById('editTenantEmail').value,
+        move_in_date: document.getElementById('editMoveInDate').value,
+        move_out_date: document.getElementById('editMoveOutDate').value || null,
+    };
+
+    fetch(`/api/tenants/${tenantId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -211,11 +228,9 @@ function updateTenant(id, tenantData) {
     .then(data => {
         console.log('Tenant updated successfully:', data);
         fetchTenants();
-        fetchRooms();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addTenantModal'));
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editTenantModal'));
         modal.hide();
         showAlert('แก้ไขข้อมูลสำเร็จ', 'ข้อมูลผู้เช่าได้รับการปรับปรุงเรียบร้อยแล้ว', 'success');
-        resetTenantForm();
     })
     .catch(error => {
         console.error('Error updating tenant:', error);
@@ -226,18 +241,14 @@ function updateTenant(id, tenantData) {
 function editTenant(id) {
     const tenant = tenants.find(t => t.id === id);
     if (tenant) {
-        document.getElementById('tenantId').value = tenant.id;
-        document.getElementById('roomId').value = tenant.room_id;
-        document.getElementById('tenantName').value = tenant.name;
-        document.getElementById('tenantPhone').value = tenant.phone;
-        document.getElementById('tenantEmail').value = tenant.email;
-        document.getElementById('moveInDate').value = tenant.move_in_date;
-        document.getElementById('moveOutDate').value = tenant.move_out_date || '';
+        document.getElementById('editTenantId').value = tenant.id;
+        document.getElementById('editTenantName').value = tenant.name;
+        document.getElementById('editTenantPhone').value = tenant.phone;
+        document.getElementById('editTenantEmail').value = tenant.email;
+        document.getElementById('editMoveInDate').value = tenant.move_in_date;
+        document.getElementById('editMoveOutDate').value = tenant.move_out_date || '';
         
-        document.querySelector('#addTenantModal .modal-title').textContent = 'แก้ไขข้อมูลผู้เช่า';
-        document.querySelector('#addTenantModal button[type="submit"]').textContent = 'บันทึกการแก้ไข';
-        
-        new bootstrap.Modal(document.getElementById('addTenantModal')).show();
+        new bootstrap.Modal(document.getElementById('editTenantModal')).show();
     }
 }
 
@@ -257,11 +268,69 @@ function deleteTenant(id) {
     }
 }
 
-function resetTenantForm() {
-    document.getElementById('tenantId').value = '';
-    document.getElementById('tenantForm').reset();
-    document.querySelector('#addTenantModal .modal-title').textContent = 'เพิ่มผู้เช่าใหม่';
-    document.querySelector('#addTenantModal button[type="submit"]').textContent = 'บันทึก';
+function handleAddRoom(e) {
+    e.preventDefault();
+    const roomData = {
+        room_number: document.getElementById('addRoomNumber').value,
+        price: parseFloat(document.getElementById('addRoomPrice').value),
+        size: parseFloat(document.getElementById('addRoomSize').value),
+        amenities: document.getElementById('addRoomAmenities').value.split(',').map(item => item.trim()),
+        description: document.getElementById('addRoomDescription').value,
+        images: document.getElementById('addRoomImages').value.split(',').map(item => item.trim()),
+    };
+
+    fetch('/api/rooms', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(roomData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Room added successfully:', data);
+        fetchRooms();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addRoomModal'));
+        modal.hide();
+        showAlert('เพิ่มห้องเช่าสำเร็จ', 'ข้อมูลห้องเช่าใหม่ได้รับการบันทึกเรียบร้อยแล้ว', 'success');
+        document.getElementById('addRoomForm').reset();
+    })
+    .catch(error => {
+        console.error('Error adding room:', error);
+        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถเพิ่มห้องเช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
+    });
+}
+
+function handleEditRoom(e) {
+    e.preventDefault();
+    const roomId = document.getElementById('editRoomId').value;
+    const roomData = {
+        room_number: document.getElementById('editRoomNumber').value,
+        price: parseFloat(document.getElementById('editRoomPrice').value),
+        size: parseFloat(document.getElementById('editRoomSize').value),
+        amenities: document.getElementById('editRoomAmenities').value.split(',').map(item => item.trim()),
+		description: document.getElementById('editRoomDescription').value,
+    };
+
+    fetch(`/api/rooms/${roomId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(roomData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Room updated successfully:', data);
+        fetchRooms();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('editRoomModal'));
+        modal.hide();
+        showAlert('แก้ไขข้อมูลสำเร็จ', 'ข้อมูลห้องเช่าได้รับการปรับปรุงเรียบร้อยแล้ว', 'success');
+    })
+    .catch(error => {
+        console.error('Error updating room:', error);
+        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถแก้ไขข้อมูลห้องเช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
+    });
 }
 
 function editRoom(id) {
@@ -290,6 +359,37 @@ function deleteRoom(id) {
                 showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลห้องเช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
             });
     }
+}
+
+function handleAddPayment(e) {
+    e.preventDefault();
+    const paymentData = {
+        tenant_id: document.getElementById('paymentTenantId').value,
+        amount: parseFloat(document.getElementById('paymentAmount').value),
+        payment_date: document.getElementById('paymentDate').value,
+        payment_method: document.getElementById('paymentMethod').value,
+    };
+
+    fetch('/api/payments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Payment added successfully:', data);
+        fetchPayments();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
+        modal.hide();
+        showAlert('บันทึกการชำระเงินสำเร็จ', 'ข้อมูลการชำระเงินได้รับการบันทึกเรียบร้อยแล้ว', 'success');
+        document.getElementById('paymentForm').reset();
+    })
+    .catch(error => {
+        console.error('Error adding payment:', error);
+        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกการชำระเงินได้ กรุณาลองใหม่อีกครั้ง', 'error');
+    });
 }
 
 function editPayment(id) {
