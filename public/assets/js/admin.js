@@ -271,6 +271,7 @@ function editRoom(id) {
         document.getElementById('editRoomNumber').value = room.room_number;
         document.getElementById('editRoomPrice').value = room.price;
         document.getElementById('editRoomSize').value = room.size || '';
+        document.getElementById('editRoomAmenities').value = room.amenities ? room.amenities.join(', ') : '';
         document.getElementById('editRoomDescription').value = room.description || '';
         new bootstrap.Modal(document.getElementById('editRoomModal')).show();
     }
