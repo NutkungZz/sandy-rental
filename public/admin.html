@@ -92,18 +92,11 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">เพิ่ม/แก้ไขผู้เช่า</h5>
+                    <h5 class="modal-title">เพิ่มผู้เช่าใหม่</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="tenantForm">
-                        <input type="hidden" id="tenantId">
-                        <div class="mb-3">
-                            <label for="roomId" class="form-label">หมายเลขห้อง</label>
-                            <select class="form-select" id="roomId" required>
-                                <!-- ตัวเลือกห้องจะถูกเพิ่มด้วย JavaScript -->
-                            </select>
-                        </div>
+                    <form id="addTenantForm">
                         <div class="mb-3">
                             <label for="tenantName" class="form-label">ชื่อผู้เช่า</label>
                             <input type="text" class="form-control" id="tenantName" required>
@@ -117,12 +110,14 @@
                             <input type="email" class="form-control" id="tenantEmail" required>
                         </div>
                         <div class="mb-3">
-                            <label for="moveInDate" class="form-label">วันที่เข้าอยู่</label>
-                            <input type="date" class="form-control" id="moveInDate" required>
+                            <label for="roomId" class="form-label">เลือกห้อง</label>
+                            <select class="form-select" id="roomId" required>
+                                <!-- ตัวเลือกห้องจะถูกเพิ่มด้วย JavaScript -->
+                            </select>
                         </div>
                         <div class="mb-3">
-                            <label for="moveOutDate" class="form-label">วันที่ย้ายออก</label>
-                            <input type="date" class="form-control" id="moveOutDate">
+                            <label for="moveInDate" class="form-label">วันที่เข้าอยู่</label>
+                            <input type="date" class="form-control" id="moveInDate" required>
                         </div>
                         <button type="submit" class="btn btn-primary">บันทึก</button>
                     </form>
