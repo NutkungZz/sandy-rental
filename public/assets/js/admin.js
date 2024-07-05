@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addRoomForm').addEventListener('submit', handleAddRoom);
     document.getElementById('editRoomForm').addEventListener('submit', handleEditRoom);
     document.getElementById('paymentForm').addEventListener('submit', handleAddPayment);
+    document.getElementById('dashboard-tab').addEventListener('click', initDashboard);
 });
 
 function fetchTenants() {
@@ -128,24 +129,24 @@ function displayRooms() {
 }
 
 function displayPayments() {
-    const paymentList = document.getElementById('paymentList');
-    paymentList.innerHTML = '';
+    const paymentTable = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
+    paymentTable.innerHTML = '';
 
-    payments.forEach(payment => {
-        const tenant = tenants.find(t => t.id === payment.tenant_id);
-        const paymentCard = `
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">การชำระเงิน - ${tenant ? tenant.name : 'ไม่ระบุผู้เช่า'}</h5>
-                    <p class="card-text">จำนวนเงิน: ${payment.amount} บาท</p>
-                    <p class="card-text">วันที่ชำระ: ${formatDate(payment.payment_date)}</p>
-                    <p class="card-text">วิธีการชำระ: ${payment.payment_method}</p>
-                    <button class="btn btn-primary btn-sm" onclick="editPayment(${payment.id})">แก้ไข</button>
-                    <button class="btn btn-danger btn-sm" onclick="deletePayment(${payment.id})">ลบ</button>
-                </div>
-            </div>
+    tenants.forEach(tenant => {
+        const row = paymentTable.insertRow();
+        const latestPayment = payments.find(p => p.tenant_id === tenant.id);
+        const status = latestPayment ? 'ชำระแล้ว' : 'รอการชำระ';
+        const statusClass = latestPayment ? 'bg-success' : 'bg-warning';
+
+        row.innerHTML = `
+            <td>${tenant.rooms.room_number}</td>
+            <td>${tenant.name}</td>
+            <td><span class="badge ${statusClass}">${status}</span></td>
+            <td>
+                <button class="btn btn-primary btn-sm" onclick="showPaymentModal(${tenant.id})">บันทึกการชำระเงิน</button>
+                <button class="btn btn-info btn-sm" onclick="showPaymentHistory(${tenant.id})">ประวัติการชำระเงิน</button>
+            </td>
         `;
-        paymentList.innerHTML += paymentCard;
     });
 }
 
@@ -309,7 +310,7 @@ function handleEditRoom(e) {
         price: parseFloat(document.getElementById('editRoomPrice').value),
         size: parseFloat(document.getElementById('editRoomSize').value),
         amenities: document.getElementById('editRoomAmenities').value.split(',').map(item => item.trim()),
-		description: document.getElementById('editRoomDescription').value,
+        description: document.getElementById('editRoomDescription').value,
     };
 
     fetch(`/api/rooms/${roomId}`, {
@@ -365,9 +366,11 @@ function handleAddPayment(e) {
     e.preventDefault();
     const paymentData = {
         tenant_id: document.getElementById('paymentTenantId').value,
+        payment_month: document.getElementById('paymentMonth').value,
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
         payment_method: document.getElementById('paymentMethod').value,
+        note: document.getElementById('paymentNote').value
     };
 
     fetch('/api/payments', {
@@ -392,31 +395,141 @@ function handleAddPayment(e) {
     });
 }
 
-function editPayment(id) {
-    const payment = payments.find(p => p.id === id);
-    if (payment) {
-        document.getElementById('paymentId').value = payment.id;
-        document.getElementById('paymentTenantId').value = payment.tenant_id;
-        document.getElementById('paymentAmount').value = payment.amount;
-        document.getElementById('paymentDate').value = payment.payment_date;
-        document.getElementById('paymentMethod').value = payment.payment_method;
+function showPaymentModal(tenantId) {
+    const tenant = tenants.find(t => t.id === tenantId);
+    if (tenant) {
+        document.getElementById('paymentTenantId').value = tenant.id;
         new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
     }
 }
 
-function deletePayment(id) {
-    if (confirm('คุณแน่ใจหรือไม่ที่จะลบการชำระเงินนี้?')) {
-        fetch(`/api/payments/${id}`, { method: 'DELETE' })
-            .then(response => response.json())
-            .then(data => {
-                fetchPayments();
-                showAlert('ลบข้อมูลสำเร็จ', 'ข้อมูลการชำระเงินได้ถูกลบเรียบร้อยแล้ว', 'success');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลการชำระเงินได้ กรุณาลองใหม่อีกครั้ง', 'error');
-            });
+function showPaymentHistory(tenantId) {
+    const tenant = tenants.find(t => t.id === tenantId);
+    const tenantPayments = payments.filter(p => p.tenant_id === tenantId);
+    
+    if (tenant && tenantPayments.length > 0) {
+        let historyHtml = `
+            <h5>ประวัติการชำระเงินของ ${tenant.name}</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>เดือน</th>
+                        <th>จำนวนเงิน</th>
+                        <th>วันที่ชำระ</th>
+                        <th>วิธีการชำระเงิน</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        tenantPayments.forEach(payment => {
+            historyHtml += `
+                <tr>
+                    <td>${payment.payment_month}</td>
+                    <td>${payment.amount} บาท</td>
+                    <td>${formatDate(payment.payment_date)}</td>
+                    <td>${payment.payment_method}</td>
+                </tr>
+            `;
+        });
+        
+        historyHtml += `
+                </tbody>
+            </table>
+        `;
+        
+        Swal.fire({
+            title: 'ประวัติการชำระเงิน',
+            html: historyHtml,
+            width: '800px'
+        });
+    } else {
+        Swal.fire({
+            title: 'ไม่พบประวัติการชำระเงิน',
+            text: 'ยังไม่มีประวัติการชำระเงินสำหรับผู้เช่านี้',
+            icon: 'info'
+        });
     }
+}
+
+function initDashboard() {
+    fetchDashboardData();
+}
+
+function fetchDashboardData() {
+    fetch('/api/dashboard')
+        .then(response => response.json())
+        .then(data => {
+            updateMonthlyPaymentChart(data.monthlyPayments);
+            updatePaymentStatusChart(data.paymentStatus);
+            updateRecentPaymentsTable(data.recentPayments);
+        })
+        .catch(error => {
+            console.error('Error fetching dashboard data:', error);
+            showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูล Dashboard ได้', 'error');
+        });
+}
+
+function updateMonthlyPaymentChart(monthlyData) {
+    const ctx = document.getElementById('monthlyPaymentChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
+            datasets: [{
+                label: 'จำนวนเงินที่ได้รับ (บาท)',
+                data: monthlyData,
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function updatePaymentStatusChart(statusData) {
+    const ctx = document.getElementById('paymentStatusChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['ชำระแล้ว', 'ยังไม่ชำระ'],
+            datasets: [{
+                data: statusData,
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 99, 132, 0.6)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        }
+    });
+}
+
+function updateRecentPaymentsTable(recentPayments) {
+    const table = document.getElementById('recentPaymentsTable').getElementsByTagName('tbody')[0];
+    table.innerHTML = '';
+    
+    recentPayments.forEach(payment => {
+        const row = table.insertRow();
+        row.innerHTML = `
+            <td>${payment.rooms.room_number}</td>
+            <td>${payment.tenants.name}</td>
+            <td>${payment.amount} บาท</td>
+            <td>${formatDate(payment.payment_date)}</td>
+            <td><span class="badge bg-success">ชำระแล้ว</span></td>
+        `;
+    });
 }
 
 function showAlert(title, message, icon) {
