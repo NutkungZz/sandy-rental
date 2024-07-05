@@ -25,6 +25,8 @@ module.exports = (req, res) => {
       require('./login')(req, res);
     } else if (pathname === '/api/register') {
       require('./register')(req, res);
+    } else if (pathname === '/api/dashboard') {
+      require('./dashboard')(req, res);
     } else {
       res.status(404).json({ error: "Not Found" });
     }
