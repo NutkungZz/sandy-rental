@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -63,6 +64,9 @@
         </div>
         <ul class="nav nav-tabs" id="adminTabs" role="tablist">
             <li class="nav-item" role="presentation">
+                <button class="nav-link" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">Dashboard</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tenants-tab" data-bs-toggle="tab" data-bs-target="#tenants" type="button" role="tab">ผู้เช่า</button>
             </li>
             <li class="nav-item" role="presentation">
@@ -73,6 +77,44 @@
             </li>
         </ul>
         <div class="tab-content mt-3" id="adminTabContent">
+            <div class="tab-pane fade" id="dashboard" role="tabpanel">
+                <h2>Dashboard การชำระเงิน</h2>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">สรุปการชำระเงินประจำเดือน</h5>
+                                <canvas id="monthlyPaymentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">สถานะการชำระเงิน</h5>
+                                <canvas id="paymentStatusChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3>รายการชำระเงินล่าสุด</h3>
+                    <table class="table table-striped" id="recentPaymentsTable">
+                        <thead>
+                            <tr>
+                                <th>ห้อง</th>
+                                <th>ผู้เช่า</th>
+                                <th>จำนวนเงิน</th>
+                                <th>วันที่ชำระ</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- ข้อมูลจะถูกเพิ่มด้วย JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
             <div class="tab-pane fade show active" id="tenants" role="tabpanel">
                 <div id="tenantList"></div>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTenantModal">เพิ่มผู้เช่าใหม่</button>
@@ -91,8 +133,23 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="payments" role="tabpanel">
-                <div id="paymentList"></div>
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">บันทึกการชำระเงิน</button>
+                <h2>บันทึกการชำระเงิน</h2>
+                <div class="mb-3">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">บันทึกการชำระเงิน</button>
+                </div>
+                <table class="table table-striped" id="paymentsTable">
+                    <thead>
+                        <tr>
+                            <th>ห้อง</th>
+                            <th>ผู้เช่า</th>
+                            <th>สถานะ</th>
+                            <th>การดำเนินการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- ข้อมูลจะถูกเพิ่มด้วย JavaScript -->
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -149,7 +206,7 @@
                         <input type="hidden" id="editTenantId">
                         <div class="mb-3">
                             <label for="editTenantName" class="form-label">ชื่อผู้เช่า</label>
-                            <input type="text" class="form-control" id="editTenantName" required>
+							<input type="text" class="form-control" id="editTenantName" required>
                         </div>
                         <div class="mb-3">
                             <label for="editTenantPhone" class="form-label">เบอร์โทรศัพท์</label>
@@ -184,12 +241,15 @@
                 </div>
                 <div class="modal-body">
                     <form id="paymentForm">
-                        <input type="hidden" id="paymentId">
                         <div class="mb-3">
                             <label for="paymentTenantId" class="form-label">ผู้เช่า</label>
                             <select class="form-select" id="paymentTenantId" required>
                                 <!-- ตัวเลือกผู้เช่าจะถูกเพิ่มด้วย JavaScript -->
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentMonth" class="form-label">เดือนที่ชำระ</label>
+                            <input type="month" class="form-control" id="paymentMonth" required>
                         </div>
                         <div class="mb-3">
                             <label for="paymentAmount" class="form-label">จำนวนเงิน</label>
@@ -206,6 +266,10 @@
                                 <option value="โอนเงิน">โอนเงิน</option>
                                 <option value="บัตรเครดิต">บัตรเครดิต</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentNote" class="form-label">หมายเหตุ</label>
+                            <textarea class="form-control" id="paymentNote" rows="3"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary">บันทึก</button>
                     </form>
