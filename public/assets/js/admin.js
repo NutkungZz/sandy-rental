@@ -58,8 +58,6 @@ function fetchRooms() {
         .catch(error => console.error('Error:', error));
 }
 
-let currentMonthYear = '';
-
 function initializeMonthYearFilter() {
     const select = document.getElementById('monthYearFilter');
     const today = new Date();
