@@ -8,48 +8,47 @@ module.exports = async (req, res) => {
     const { method } = req;
 
     switch (method) {
-    case 'GET':
-        try {
-            const { data, error } = await supabase
-                .from('payments')
-                .select(`
-                    id,
-                    tenant_id,
-                    amount,
-                    payment_date,
-                    payment_method,
-                    tenants(id, name),
-                    rooms(id, room_number)
-                `)
-                .order('payment_date', { ascending: false });
-            
-            if (error) throw error;
-            console.log('Payments data from database:', data);
-            res.status(200).json(data);
-        } catch (error) {
-            console.error('Error in GET /api/payments:', error);
-            res.status(400).json({ success: false, message: error.message });
-        }
-        break;
+        case 'GET':
+            try {
+                const { month } = req.query;
+                
+                const { data, error } = await supabase
+                    .from('payments')
+                    .select(`
+                        id,
+                        tenant_id,
+                        amount,
+                        payment_date,
+                        payment_method,
+                        payment_for_month,
+                        tenants(id, name),
+                        rooms(id, room_number)
+                    `)
+                    .eq('payment_for_month', month + '-01')
+                    .order('payment_date', { ascending: false });
+                
+                if (error) throw error;
+                res.status(200).json(data);
+            } catch (error) {
+                res.status(400).json({ success: false, message: error.message });
+            }
+            break;
 
         case 'POST':
             try {
-                const { tenant_id, amount, payment_date, payment_method } = req.body;
-                console.log('Received payment data:', req.body);
-        
-                if (!tenant_id || !amount || !payment_date || !payment_method) {
+                const { tenant_id, amount, payment_date, payment_method, payment_for_month } = req.body;
+
+                if (!tenant_id || !amount || !payment_date || !payment_method || !payment_for_month) {
                     throw new Error('Missing required fields');
                 }
-        
+
                 const { data, error } = await supabase
                     .from('payments')
-                    .insert({ tenant_id, amount, payment_date, payment_method });
+                    .insert({ tenant_id, amount, payment_date, payment_method, payment_for_month });
                 
                 if (error) throw error;
-                console.log('Inserted payment data:', data);
                 res.status(201).json(data);
             } catch (error) {
-                console.error('Error in POST /api/payments:', error);
                 res.status(400).json({ success: false, message: error.message });
             }
             break;
