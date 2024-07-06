@@ -129,23 +129,23 @@ function displayRooms() {
 }
 
 function displayPayments() {
+    console.log('Displaying payments:', payments);
     const paymentTable = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
     paymentTable.innerHTML = '';
 
-    tenants.forEach(tenant => {
-        const row = paymentTable.insertRow();
-        const latestPayment = payments.find(p => p.tenant_id === tenant.id);
-        const status = latestPayment ? 'ชำระแล้ว' : 'รอการชำระ';
-        const statusClass = latestPayment ? 'bg-success' : 'bg-warning';
+    if (!Array.isArray(payments)) {
+        console.error('payments is not an array:', payments);
+        return;
+    }
 
+    payments.forEach(payment => {
+        const row = paymentTable.insertRow();
         row.innerHTML = `
-            <td>${tenant.rooms.room_number}</td>
-            <td>${tenant.name}</td>
-            <td><span class="badge ${statusClass}">${status}</span></td>
-            <td>
-                <button class="btn btn-primary btn-sm" onclick="showPaymentModal(${tenant.id})">บันทึกการชำระเงิน</button>
-                <button class="btn btn-info btn-sm" onclick="showPaymentHistory(${tenant.id})">ประวัติการชำระเงิน</button>
-            </td>
+            <td>${payment.rooms.room_number}</td>
+            <td>${payment.tenants.name}</td>
+            <td>${payment.amount} บาท</td>
+            <td>${formatDate(payment.payment_date)}</td>
+            <td>${payment.payment_method}</td>
         `;
     });
 }
