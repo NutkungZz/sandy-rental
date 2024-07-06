@@ -58,15 +58,32 @@ function fetchRooms() {
         .catch(error => console.error('Error:', error));
 }
 
+let currentMonthYear = '';
+
+function initializeMonthYearFilter() {
+    const select = document.getElementById('monthYearFilter');
+    const today = new Date();
+    for (let i = 0; i < 12; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const option = document.createElement('option');
+        option.value = d.toISOString().slice(0, 7);
+        option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
+        select.appendChild(option);
+    }
+    currentMonthYear = select.value;
+}
+
 function fetchPayments() {
     currentMonthYear = document.getElementById('monthYearFilter').value;
+    console.log('Fetching payments for:', currentMonthYear);
     fetch(`/api/payments?month=${currentMonthYear}`)
         .then(response => response.json())
         .then(data => {
+            console.log('Received payments data:', data);
             payments = data;
             displayPayments();
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error fetching payments:', error));
 }
 
 function displayTenants() {
@@ -145,6 +162,7 @@ function displayRooms() {
 }
 
 function displayPayments() {
+    console.log('Displaying payments:', payments);
     const paymentTable = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
     paymentTable.innerHTML = '';
 
@@ -153,7 +171,7 @@ function displayPayments() {
     let totalAmount = 0;
 
     rooms.forEach(room => {
-        const payment = payments.find(p => p.room_id === room.id);
+        const payment = payments.find(p => p.rooms.id === room.id);
         const tenant = tenants.find(t => t.room_id === room.id);
 
         const row = paymentTable.insertRow();
@@ -407,7 +425,7 @@ function handleAddPayment(e) {
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
         payment_method: document.getElementById('paymentMethod').value,
-        payment_month: document.getElementById('paymentMonth').value
+        payment_for_month: currentMonthYear + '-01'
     };
 
     fetch('/api/payments', {
