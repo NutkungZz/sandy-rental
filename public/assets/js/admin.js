@@ -365,13 +365,13 @@ function deleteRoom(id) {
 function handleAddPayment(e) {
     e.preventDefault();
     const paymentData = {
-        tenant_id: document.getElementById('paymentTenantId').value,
-        payment_month: document.getElementById('paymentMonth').value,
+        tenant_id: parseInt(document.getElementById('paymentTenantId').value),
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
-        payment_method: document.getElementById('paymentMethod').value,
-        note: document.getElementById('paymentNote').value
+        payment_method: document.getElementById('paymentMethod').value
     };
+
+    console.log('Sending payment data:', paymentData);
 
     fetch('/api/payments', {
         method: 'POST',
@@ -380,7 +380,12 @@ function handleAddPayment(e) {
         },
         body: JSON.stringify(paymentData),
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         console.log('Payment added successfully:', data);
         fetchPayments();
