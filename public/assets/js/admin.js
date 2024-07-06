@@ -1,6 +1,7 @@
 let tenants = [];
 let rooms = [];
 let payments = [];
+let currentMonthYear = '';
 
 document.addEventListener('DOMContentLoaded', function() {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -10,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     fetchTenants();
     fetchRooms();
+    initializeMonthYearFilter();
     fetchPayments();
 
     document.getElementById('logoutBtn').addEventListener('click', logout);
@@ -18,8 +20,21 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('addRoomForm').addEventListener('submit', handleAddRoom);
     document.getElementById('editRoomForm').addEventListener('submit', handleEditRoom);
     document.getElementById('paymentForm').addEventListener('submit', handleAddPayment);
-    document.getElementById('dashboard-tab').addEventListener('click', initDashboard);
+    document.getElementById('monthYearFilter').addEventListener('change', fetchPayments);
 });
+
+function initializeMonthYearFilter() {
+    const select = document.getElementById('monthYearFilter');
+    const today = new Date();
+    for (let i = 0; i < 12; i++) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const option = document.createElement('option');
+        option.value = d.toISOString().slice(0, 7);
+        option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
+        select.appendChild(option);
+    }
+    currentMonthYear = select.value;
+}
 
 function fetchTenants() {
     fetch('/api/tenants')
@@ -44,7 +59,8 @@ function fetchRooms() {
 }
 
 function fetchPayments() {
-    fetch('/api/payments')
+    currentMonthYear = document.getElementById('monthYearFilter').value;
+    fetch(`/api/payments?month=${currentMonthYear}`)
         .then(response => response.json())
         .then(data => {
             payments = data;
@@ -129,25 +145,38 @@ function displayRooms() {
 }
 
 function displayPayments() {
-    console.log('Displaying payments:', payments);
     const paymentTable = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
     paymentTable.innerHTML = '';
 
-    if (!Array.isArray(payments)) {
-        console.error('payments is not an array:', payments);
-        return;
-    }
+    let paidCount = 0;
+    let unpaidCount = 0;
+    let totalAmount = 0;
 
-    payments.forEach(payment => {
+    rooms.forEach(room => {
+        const payment = payments.find(p => p.room_id === room.id);
+        const tenant = tenants.find(t => t.room_id === room.id);
+
         const row = paymentTable.insertRow();
         row.innerHTML = `
-            <td>${payment.rooms.room_number}</td>
-            <td>${payment.tenants.name}</td>
-            <td>${payment.amount} บาท</td>
-            <td>${formatDate(payment.payment_date)}</td>
-            <td>${payment.payment_method}</td>
+            <td>${room.room_number}</td>
+            <td>${tenant ? tenant.name : 'ว่าง'}</td>
+            <td>${payment ? '<span class="badge bg-success">ชำระแล้ว</span>' : '<span class="badge bg-warning">ยังไม่ชำระ</span>'}</td>
+            <td>${payment ? `${payment.amount} บาท` : '-'}</td>
+            <td>${payment ? formatDate(payment.payment_date) : '-'}</td>
+            <td>${tenant ? `<button class="btn btn-sm btn-primary" onclick="showPaymentModal(${tenant.id})">บันทึกการชำระเงิน</button>` : '-'}</td>
         `;
+
+        if (payment) {
+            paidCount++;
+            totalAmount += payment.amount;
+        } else if (tenant) {
+            unpaidCount++;
+        }
     });
+
+    document.getElementById('paidCount').textContent = paidCount;
+    document.getElementById('unpaidCount').textContent = unpaidCount;
+    document.getElementById('totalAmount').textContent = totalAmount.toLocaleString();
 }
 
 function populateRoomSelect() {
@@ -362,16 +391,24 @@ function deleteRoom(id) {
     }
 }
 
+function showPaymentModal(tenantId) {
+    const tenant = tenants.find(t => t.id === tenantId);
+    if (tenant) {
+        document.getElementById('paymentTenantId').value = tenant.id;
+        document.getElementById('paymentMonth').value = currentMonthYear;
+        new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
+    }
+}
+
 function handleAddPayment(e) {
     e.preventDefault();
     const paymentData = {
         tenant_id: parseInt(document.getElementById('paymentTenantId').value),
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
-        payment_method: document.getElementById('paymentMethod').value
+        payment_method: document.getElementById('paymentMethod').value,
+        payment_month: document.getElementById('paymentMonth').value
     };
-
-    console.log('Sending payment data:', paymentData);
 
     fetch('/api/payments', {
         method: 'POST',
@@ -380,12 +417,7 @@ function handleAddPayment(e) {
         },
         body: JSON.stringify(paymentData),
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         console.log('Payment added successfully:', data);
         fetchPayments();
@@ -397,143 +429,6 @@ function handleAddPayment(e) {
     .catch(error => {
         console.error('Error adding payment:', error);
         showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกการชำระเงินได้ กรุณาลองใหม่อีกครั้ง', 'error');
-    });
-}
-
-function showPaymentModal(tenantId) {
-    const tenant = tenants.find(t => t.id === tenantId);
-    if (tenant) {
-        document.getElementById('paymentTenantId').value = tenant.id;
-        new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
-    }
-}
-
-function showPaymentHistory(tenantId) {
-    const tenant = tenants.find(t => t.id === tenantId);
-    const tenantPayments = payments.filter(p => p.tenant_id === tenantId);
-    
-    if (tenant && tenantPayments.length > 0) {
-        let historyHtml = `
-            <h5>ประวัติการชำระเงินของ ${tenant.name}</h5>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>เดือน</th>
-                        <th>จำนวนเงิน</th>
-                        <th>วันที่ชำระ</th>
-                        <th>วิธีการชำระเงิน</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
-        tenantPayments.forEach(payment => {
-            historyHtml += `
-                <tr>
-                    <td>${payment.payment_month}</td>
-                    <td>${payment.amount} บาท</td>
-                    <td>${formatDate(payment.payment_date)}</td>
-                    <td>${payment.payment_method}</td>
-                </tr>
-            `;
-        });
-        
-        historyHtml += `
-                </tbody>
-            </table>
-        `;
-        
-        Swal.fire({
-            title: 'ประวัติการชำระเงิน',
-            html: historyHtml,
-            width: '800px'
-        });
-    } else {
-        Swal.fire({
-            title: 'ไม่พบประวัติการชำระเงิน',
-            text: 'ยังไม่มีประวัติการชำระเงินสำหรับผู้เช่านี้',
-            icon: 'info'
-        });
-    }
-}
-
-function initDashboard() {
-    fetchDashboardData();
-}
-
-function fetchDashboardData() {
-    fetch('/api/dashboard')
-        .then(response => response.json())
-        .then(data => {
-            updateMonthlyPaymentChart(data.monthlyPayments);
-            updatePaymentStatusChart(data.paymentStatus);
-            updateRecentPaymentsTable(data.recentPayments);
-        })
-        .catch(error => {
-            console.error('Error fetching dashboard data:', error);
-            showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถโหลดข้อมูล Dashboard ได้', 'error');
-        });
-}
-
-function updateMonthlyPaymentChart(monthlyData) {
-    const ctx = document.getElementById('monthlyPaymentChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
-            datasets: [{
-                label: 'จำนวนเงินที่ได้รับ (บาท)',
-                data: monthlyData,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
-}
-
-function updatePaymentStatusChart(statusData) {
-    const ctx = document.getElementById('paymentStatusChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['ชำระแล้ว', 'ยังไม่ชำระ'],
-            datasets: [{
-                data: statusData,
-                backgroundColor: [
-                    'rgba(75, 192, 192, 0.6)',
-                    'rgba(255, 99, 132, 0.6)'
-                ],
-                borderColor: [
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(255, 99, 132, 1)'
-                ],
-                borderWidth: 1
-            }]
-        }
-    });
-}
-
-function updateRecentPaymentsTable(recentPayments) {
-    const table = document.getElementById('recentPaymentsTable').getElementsByTagName('tbody')[0];
-    table.innerHTML = '';
-    
-    recentPayments.forEach(payment => {
-        const row = table.insertRow();
-        row.innerHTML = `
-            <td>${payment.rooms.room_number}</td>
-            <td>${payment.tenants.name}</td>
-            <td>${payment.amount} บาท</td>
-            <td>${formatDate(payment.payment_date)}</td>
-            <td><span class="badge bg-success">ชำระแล้ว</span></td>
-        `;
     });
 }
 
