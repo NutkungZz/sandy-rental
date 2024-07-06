@@ -8,19 +8,29 @@ module.exports = async (req, res) => {
     const { method } = req;
 
     switch (method) {
-        case 'GET':
-            try {
-                const { data, error } = await supabase
-                    .from('payments')
-                    .select('*, tenants(name), rooms(room_number)')
-                    .order('payment_date', { ascending: false });
-                
-                if (error) throw error;
-                res.status(200).json(data);
-            } catch (error) {
-                res.status(400).json({ success: false, message: error.message });
-            }
-            break;
+    case 'GET':
+        try {
+            const { data, error } = await supabase
+                .from('payments')
+                .select(`
+                    id,
+                    tenant_id,
+                    amount,
+                    payment_date,
+                    payment_method,
+                    tenants(id, name),
+                    rooms(id, room_number)
+                `)
+                .order('payment_date', { ascending: false });
+            
+            if (error) throw error;
+            console.log('Payments data from database:', data);
+            res.status(200).json(data);
+        } catch (error) {
+            console.error('Error in GET /api/payments:', error);
+            res.status(400).json({ success: false, message: error.message });
+        }
+        break;
 
         case 'POST':
             try {
