@@ -24,15 +24,22 @@ module.exports = async (req, res) => {
 
         case 'POST':
             try {
-                const { tenant_id, payment_month, amount, payment_date, payment_method, note } = req.body;
-                
+                const { tenant_id, amount, payment_date, payment_method } = req.body;
+                console.log('Received payment data:', req.body);
+        
+                if (!tenant_id || !amount || !payment_date || !payment_method) {
+                    throw new Error('Missing required fields');
+                }
+        
                 const { data, error } = await supabase
                     .from('payments')
-                    .insert({ tenant_id, payment_month, amount, payment_date, payment_method, note });
+                    .insert({ tenant_id, amount, payment_date, payment_method });
                 
                 if (error) throw error;
+                console.log('Inserted payment data:', data);
                 res.status(201).json(data);
             } catch (error) {
+                console.error('Error in POST /api/payments:', error);
                 res.status(400).json({ success: false, message: error.message });
             }
             break;
