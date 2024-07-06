@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="assets/css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             background-color: #f8f9fa;
@@ -64,9 +63,6 @@
         </div>
         <ul class="nav nav-tabs" id="adminTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="dashboard-tab" data-bs-toggle="tab" data-bs-target="#dashboard" type="button" role="tab">Dashboard</button>
-            </li>
-            <li class="nav-item" role="presentation">
                 <button class="nav-link active" id="tenants-tab" data-bs-toggle="tab" data-bs-target="#tenants" type="button" role="tab">ผู้เช่า</button>
             </li>
             <li class="nav-item" role="presentation">
@@ -77,44 +73,6 @@
             </li>
         </ul>
         <div class="tab-content mt-3" id="adminTabContent">
-            <div class="tab-pane fade" id="dashboard" role="tabpanel">
-                <h2>Dashboard การชำระเงิน</h2>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">สรุปการชำระเงินประจำเดือน</h5>
-                                <canvas id="monthlyPaymentChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h5 class="card-title">สถานะการชำระเงิน</h5>
-                                <canvas id="paymentStatusChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <h3>รายการชำระเงินล่าสุด</h3>
-                    <table class="table table-striped" id="recentPaymentsTable">
-                        <thead>
-                            <tr>
-                                <th>ห้อง</th>
-                                <th>ผู้เช่า</th>
-                                <th>จำนวนเงิน</th>
-                                <th>วันที่ชำระ</th>
-                                <th>สถานะ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- ข้อมูลจะถูกเพิ่มด้วย JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
             <div class="tab-pane fade show active" id="tenants" role="tabpanel">
                 <div id="tenantList"></div>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTenantModal">เพิ่มผู้เช่าใหม่</button>
@@ -133,23 +91,56 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="payments" role="tabpanel">
-                <h2>บันทึกการชำระเงิน</h2>
-                <div class="mb-3">
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">บันทึกการชำระเงิน</button>
+                <h2>การชำระเงิน</h2>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <select id="monthYearFilter" class="form-select">
+                            <!-- จะถูกเติมด้วย JavaScript -->
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPaymentModal">บันทึกการชำระเงิน</button>
+                    </div>
                 </div>
-                <table class="table table-striped" id="paymentsTable">
-                    <thead>
-                        <tr>
-                            <th>ห้อง</th>
-                            <th>ผู้เช่า</th>
-                            <th>สถานะ</th>
-                            <th>การดำเนินการ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- ข้อมูลจะถูกเพิ่มด้วย JavaScript -->
-                    </tbody>
-                </table>
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">สรุปการชำระเงิน</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="alert alert-success">
+                                    ชำระแล้ว: <span id="paidCount">0</span> ห้อง
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-warning">
+                                    ยังไม่ชำระ: <span id="unpaidCount">0</span> ห้อง
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="alert alert-info">
+                                    ยอดรวม: <span id="totalAmount">0</span> บาท
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <table class="table table-striped" id="paymentsTable">
+                        <thead>
+                            <tr>
+                                <th>ห้อง</th>
+                                <th>ผู้เช่า</th>
+                                <th>สถานะ</th>
+                                <th>จำนวนเงิน</th>
+                                <th>วันที่ชำระ</th>
+                                <th>การดำเนินการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- ข้อมูลจะถูกเพิ่มด้วย JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -206,7 +197,7 @@
                         <input type="hidden" id="editTenantId">
                         <div class="mb-3">
                             <label for="editTenantName" class="form-label">ชื่อผู้เช่า</label>
-							<input type="text" class="form-control" id="editTenantName" required>
+                            <input type="text" class="form-control" id="editTenantName" required>
                         </div>
                         <div class="mb-3">
                             <label for="editTenantPhone" class="form-label">เบอร์โทรศัพท์</label>
@@ -232,45 +223,49 @@
     </div>
     
     <!-- Modal สำหรับบันทึกการชำระเงิน -->
-	<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
-	    <div class="modal-dialog">
-	        <div class="modal-content">
-	            <div class="modal-header">
-	                <h5 class="modal-title">บันทึกการชำระเงิน</h5>
-	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-	            </div>
-	            <div class="modal-body">
-	                <form id="paymentForm">
-	                    <div class="mb-3">
-	                        <label for="paymentTenantId" class="form-label">ผู้เช่า</label>
-	                        <select class="form-select" id="paymentTenantId" required>
-	                            <!-- ตัวเลือกผู้เช่าจะถูกเพิ่มด้วย JavaScript -->
-	                        </select>
-	                    </div>
-	                    <div class="mb-3">
-	                        <label for="paymentAmount" class="form-label">จำนวนเงิน</label>
-	                        <input type="number" class="form-control" id="paymentAmount" required step="0.01">
-	                    </div>
-	                    <div class="mb-3">
-	                        <label for="paymentDate" class="form-label">วันที่ชำระ</label>
-	                        <input type="date" class="form-control" id="paymentDate" required>
-	                    </div>
-	                    <div class="mb-3">
-	                        <label for="paymentMethod" class="form-label">วิธีการชำระเงิน</label>
-	                        <select class="form-select" id="paymentMethod" required>
-	                            <option value="เงินสด">เงินสด</option>
-	                            <option value="โอนเงิน">โอนเงิน</option>
-	                            <option value="บัตรเครดิต">บัตรเครดิต</option>
-	                        </select>
-	                    </div>
-	                    <button type="submit" class="btn btn-primary">บันทึก</button>
-	                </form>
-	            </div>
-	        </div>
-	    </div>
-	</div>
-
-    <!-- Modal สำหรับแก้ไขห้องเช่า -->
+    <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">บันทึกการชำระเงิน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="paymentForm">
+                        <input type="hidden" id="paymentId">
+                        <div class="mb-3">
+                            <label for="paymentTenantId" class="form-label">ผู้เช่า</label>
+                            <select class="form-select" id="paymentTenantId" required>
+                                <!-- ตัวเลือกผู้เช่าจะถูกเพิ่มด้วย JavaScript -->
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentMonth" class="form-label">เดือนที่ชำระ</label>
+                            <input type="month" class="form-control" id="paymentMonth" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentAmount" class="form-label">จำนวนเงิน</label>
+                            <input type="number" class="form-control" id="paymentAmount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentDate" class="form-label">วันที่ชำระ</label>
+                            <input type="date" class="form-control" id="paymentDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentMethod" class="form-label">วิธีการชำระเงิน</label>
+                            <select class="form-select" id="paymentMethod" required>
+                                <option value="เงินสด">เงินสด</option>
+                                <option value="โอนเงิน">โอนเงิน</option>
+                                <option value="บัตรเครดิต">บัตรเครดิต</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">บันทึก</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+	<!-- Modal สำหรับแก้ไขห้องเช่า -->
     <div class="modal fade" id="editRoomModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
