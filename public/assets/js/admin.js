@@ -409,14 +409,17 @@ function showPaymentModal(tenantId, roomId) {
 
 function handleAddPayment(e) {
     e.preventDefault();
+    const paymentForMonth = document.getElementById('paymentForMonth').value;
     const paymentData = {
         tenant_id: parseInt(document.getElementById('paymentTenantId').value),
         room_id: parseInt(document.getElementById('paymentRoomId').value),
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
         payment_method: document.getElementById('paymentMethod').value,
-        payment_for_month: currentMonthYear + '-01'
+        payment_for_month: paymentForMonth + '-01' // กำหนดเป็นวันที่ 1 ของเดือนที่เลือก
     };
+
+    console.log('Submitting payment data:', paymentData); // เพิ่ม log เพื่อตรวจสอบข้อมูล
 
     fetch('/api/payments', {
         method: 'POST',
