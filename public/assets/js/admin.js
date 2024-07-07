@@ -72,11 +72,13 @@ function initializeMonthYearFilter() {
 
 function fetchPayments() {
     currentMonthYear = document.getElementById('monthYearFilter').value;
-    console.log('Selected month for payments:', currentMonthYear);
+    console.log('Fetching payments for:', currentMonthYear);
     return fetch(`/api/payments?month=${currentMonthYear}`)
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                return response.json().then(err => {
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${err.message}`);
+                });
             }
             return response.json();
         })
@@ -89,6 +91,7 @@ function fetchPayments() {
             console.error('Error fetching payments:', error);
             payments = [];
             displayPayments();
+            showAlert('เกิดข้อผิดพลาด', `ไม่สามารถดึงข้อมูลการชำระเงินได้: ${error.message}`, 'error');
         });
 }
 
