@@ -216,7 +216,7 @@ function populateTenantSelect() {
         tenantSelect.appendChild(option);
     });
 
-    console.log('Tenant select populated:', tenantSelect.innerHTML);
+    //console.log('Tenant select populated:', tenantSelect.innerHTML);
 }
 
 function handleAddTenant(e) {
