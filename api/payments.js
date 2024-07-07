@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
             }
     
             const startDate = `${month}-01`;
-            const endDate = new Date(month.slice(0, 4), month.slice(5, 7), 0).toISOString().split('T')[0];
+            const endDate = new Date(month.slice(0, 4), parseInt(month.slice(5, 7)), 0).toISOString().split('T')[0];
     
             console.log('Fetching payments from', startDate, 'to', endDate);
     
