@@ -61,6 +61,7 @@ function initializeMonthYearFilter() {
         select.appendChild(option);
     }
     currentMonthYear = select.value;
+    console.log('Initial month-year filter value:', currentMonthYear);
 }
 
 function fetchPayments() {
