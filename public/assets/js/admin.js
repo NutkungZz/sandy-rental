@@ -66,6 +66,7 @@ function initializeMonthYearFilter() {
         option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
         select.appendChild(option);
     }
+    select.value = today.toISOString().slice(0, 7); // เซ็ตค่าเริ่มต้นเป็นเดือนปัจจุบัน
     currentMonthYear = select.value;
     console.log('Initial month-year filter value:', currentMonthYear);
 }
