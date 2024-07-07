@@ -451,6 +451,8 @@ function handleAddPayment(e) {
         modal.hide();
         showAlert('บันทึกการชำระเงินสำเร็จ', 'ข้อมูลการชำระเงินได้รับการบันทึกเรียบร้อยแล้ว', 'success');
         document.getElementById('paymentForm').reset();
+        currentMonthYear = document.getElementById('paymentForMonth').value.slice(0, 7);
+        return fetchPayments();
     })
     .catch(error => {
         console.error('Error adding payment:', error);
