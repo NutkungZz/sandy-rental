@@ -87,7 +87,7 @@ function initializeMonthYearFilter() {
     const today = new Date();
     const currentMonth = today.toISOString().slice(0, 7);
     
-    for (let i = 0; i < 12; i++) {
+    for (let i = 1; i < 13; i++) {
         const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
         const optionValue = d.toISOString().slice(0, 7);
         const option = document.createElement('option');
