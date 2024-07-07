@@ -9,15 +9,14 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'index.html';
         return;
     }
-    fetchTenants();
-    fetchRooms();
-    initializeMonthYearFilter();
-    fetchPayments();
-
-    //ตรวจสอบว่าฟังก์ชัน populateTenantSelect() ถูกเรียกหลังจากที่ข้อมูลผู้เช่าถูกโหลดเรียบร้อยแล้ว:
-    fetchTenants().then(() => {
-        populateTenantSelect();
-    });
+    
+    Promise.all([fetchTenants(), fetchRooms()])
+        .then(() => {
+            initializeMonthYearFilter();
+            fetchPayments();
+            populateTenantSelect();
+        })
+        .catch(error => console.error('Error initializing data:', error));
 
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('addTenantForm').addEventListener('submit', handleAddTenant);
@@ -28,24 +27,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('monthYearFilter').addEventListener('change', fetchPayments);
 });
 
-function initializeMonthYearFilter() {
-    const select = document.getElementById('monthYearFilter');
-    const today = new Date();
-    for (let i = 0; i < 12; i++) {
-        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
-        const option = document.createElement('option');
-        option.value = d.toISOString().slice(0, 7);
-        option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
-        select.appendChild(option);
-    }
-    currentMonthYear = select.value;
-}
-
 function fetchTenants() {
-    fetch('/api/tenants')
+    return fetch('/api/tenants')
         .then(response => response.json())
         .then(data => {
-            console.log('Fetched tenants:', data); // เพิ่ม log นี้
+            console.log('Fetched tenants:', data);
             tenants = data;
             displayTenants();
             populateTenantSelect();
@@ -54,14 +40,14 @@ function fetchTenants() {
 }
 
 function fetchRooms() {
-    fetch('/api/rooms')
+    return fetch('/api/rooms')
         .then(response => response.json())
         .then(data => {
+            console.log('Fetched rooms:', data);
             rooms = data;
-            populateRoomSelect();
             displayRooms();
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error fetching rooms:', error));
 }
 
 function initializeMonthYearFilter() {
@@ -80,7 +66,7 @@ function initializeMonthYearFilter() {
 function fetchPayments() {
     currentMonthYear = document.getElementById('monthYearFilter').value;
     console.log('Fetching payments for:', currentMonthYear);
-    fetch(`/api/payments?month=${currentMonthYear}`)
+    return fetch(`/api/payments?month=${currentMonthYear}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -94,7 +80,7 @@ function fetchPayments() {
         })
         .catch(error => {
             console.error('Error fetching payments:', error);
-            payments = []; // ตั้งค่าให้เป็น array ว่างเมื่อเกิดข้อผิดพลาด
+            payments = [];
             displayPayments();
         });
 }
@@ -108,7 +94,7 @@ function displayTenants() {
             <div class="card mb-3">
                 <div class="card-body">
                     <h5 class="card-title">${tenant.name}</h5>
-                    <p class="card-text">ห้อง: ${tenant.rooms.room_number}</p>
+                    <p class="card-text">ห้อง: ${tenant.rooms ? tenant.rooms.room_number : 'ไม่ระบุ'}</p>
                     <p class="card-text">โทรศัพท์: ${tenant.phone}</p>
                     <p class="card-text">อีเมล: ${tenant.email}</p>
                     <p class="card-text">วันที่เข้าอยู่: ${formatDate(tenant.move_in_date)}</p>
@@ -126,7 +112,6 @@ function displayRooms() {
     const roomList = document.getElementById('roomList');
     roomList.innerHTML = '';
 
-    // เพิ่มการ์ดสำหรับเพิ่มห้องใหม่
     const addRoomCard = `
         <div class="col-md-4 mb-3">
             <div class="card add-room-card h-100" data-bs-toggle="modal" data-bs-target="#addRoomModal">
@@ -210,31 +195,25 @@ function displayPayments() {
     document.getElementById('totalAmount').textContent = totalAmount.toLocaleString();
 }
 
-function populateRoomSelect() {
-    const roomSelect = document.getElementById('addRoomId');
-    roomSelect.innerHTML = '<option value="">เลือกห้อง</option>';
-    rooms.forEach(room => {
-        if (!tenants.some(tenant => tenant.room_id === room.id)) {
-            const option = document.createElement('option');
-            option.value = room.id;
-            option.textContent = `ห้อง ${room.room_number}`;
-            roomSelect.appendChild(option);
-        }
-    });
-}
-
 function populateTenantSelect() {
     const tenantSelect = document.getElementById('paymentTenantId');
     tenantSelect.innerHTML = '<option value="">เลือกผู้เช่า</option>';
-    tenants.forEach(tenant => {
-        if (tenant.room_id) { // เพิ่มเงื่อนไขนี้เพื่อแสดงเฉพาะผู้เช่าที่มีห้องเช่า
-            const option = document.createElement('option');
-            option.value = tenant.id;
-            option.textContent = `${tenant.name} (ห้อง ${tenant.rooms.room_number})`;
-            tenantSelect.appendChild(option);
-        }
-    });
-    console.log('Populated tenant select:', tenantSelect.innerHTML); // เพิ่ม log นี้
+    if (tenants.length === 0) {
+        const option = document.createElement('option');
+        option.textContent = 'ไม่พบข้อมูลผู้เช่า';
+        option.disabled = true;
+        tenantSelect.appendChild(option);
+    } else {
+        tenants.forEach(tenant => {
+            if (tenant.rooms && tenant.rooms.room_number) {
+                const option = document.createElement('option');
+                option.value = tenant.id;
+                option.textContent = `${tenant.name} (ห้อง ${tenant.rooms.room_number})`;
+                tenantSelect.appendChild(option);
+            }
+        });
+    }
+    console.log('Populated tenant select:', tenantSelect.innerHTML);
 }
 
 function handleAddTenant(e) {
@@ -430,7 +409,6 @@ function showPaymentModal(tenantId, roomId) {
     document.getElementById('paymentRoomId').value = roomId;
     new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
 }
-
 
 function handleAddPayment(e) {
     e.preventDefault();
