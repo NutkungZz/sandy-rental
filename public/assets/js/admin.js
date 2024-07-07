@@ -169,7 +169,7 @@ function displayPayments() {
     let totalAmount = 0;
 
     rooms.forEach(room => {
-        const payment = payments.find(p => p.room_id === room.id);
+        const payment = payments.find(p => p.room_id === room.id && p.payment_for_month.startsWith(currentMonthYear));
         const tenant = tenants.find(t => t.room_id === room.id);
 
         const row = paymentTable.insertRow();
