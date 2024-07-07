@@ -223,49 +223,48 @@
     </div>
     
  <!-- Modal สำหรับบันทึกการชำระเงิน -->
-<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">บันทึกการชำระเงิน</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="paymentForm">
-                    <div class="mb-3">
-                        <label for="paymentTenantId" class="form-label">ผู้เช่า</label>
-                        <select class="form-select" id="paymentTenantId" required>
-                            <option value="">เลือกผู้เช่า</option>
-                            <!-- ตัวเลือกผู้เช่าจะถูกเพิ่มด้วย JavaScript -->
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="paymentAmount" class="form-label">จำนวนเงิน</label>
-                        <input type="number" class="form-control" id="paymentAmount" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="paymentDate" class="form-label">วันที่ชำระ</label>
-                        <input type="date" class="form-control" id="paymentDate" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="paymentMethod" class="form-label">วิธีการชำระเงิน</label>
-                        <select class="form-select" id="paymentMethod" required>
-                            <option value="เงินสด">เงินสด</option>
-                            <option value="โอนเงิน">โอนเงิน</option>
-                            <option value="บัตรเครดิต">บัตรเครดิต</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="paymentNote" class="form-label">หมายเหตุ</label>
-                        <textarea class="form-control" id="paymentNote" rows="3"></textarea>
-                    </div>
-                    <input type="hidden" id="paymentRoomId">
-                    <button type="submit" class="btn btn-primary">บันทึก</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+	<div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
+	    <div class="modal-dialog">
+	        <div class="modal-content">
+	            <div class="modal-header">
+	                <h5 class="modal-title">บันทึกการชำระเงิน</h5>
+	                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+	            </div>
+	            <div class="modal-body">
+	                <form id="paymentForm">
+	                    <div class="mb-3">
+	                        <label for="paymentTenantId" class="form-label">ผู้เช่า</label>
+	                        <select class="form-select" id="paymentTenantId" required>
+	                            <!-- ตัวเลือกผู้เช่าจะถูกเพิ่มด้วย JavaScript -->
+	                        </select>
+	                    </div>
+	                    <div class="mb-3">
+	                        <label for="paymentForMonth" class="form-label">เดือนที่ต้องการชำระ</label>
+	                        <input type="month" class="form-control" id="paymentForMonth" required>
+	                    </div>
+	                    <div class="mb-3">
+	                        <label for="paymentAmount" class="form-label">จำนวนเงิน</label>
+	                        <input type="number" class="form-control" id="paymentAmount" required>
+	                    </div>
+	                    <div class="mb-3">
+	                        <label for="paymentDate" class="form-label">วันที่ชำระ</label>
+	                        <input type="date" class="form-control" id="paymentDate" required>
+	                    </div>
+	                    <div class="mb-3">
+	                        <label for="paymentMethod" class="form-label">วิธีการชำระเงิน</label>
+	                        <select class="form-select" id="paymentMethod" required>
+	                            <option value="เงินสด">เงินสด</option>
+	                            <option value="โอนเงิน">โอนเงิน</option>
+	                            <option value="บัตรเครดิต">บัตรเครดิต</option>
+	                        </select>
+	                    </div>
+	                    <input type="hidden" id="paymentRoomId">
+	                    <button type="submit" class="btn btn-primary">บันทึก</button>
+	                </form>
+	            </div>
+	        </div>
+	    </div>
+	</div>
 	<!-- Modal สำหรับแก้ไขห้องเช่า -->
     <div class="modal fade" id="editRoomModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
