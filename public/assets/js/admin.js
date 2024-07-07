@@ -34,7 +34,7 @@ function fetchTenants() {
             console.log('Fetched tenants:', data);
             tenants = data;
             displayTenants();
-            populateTenantSelect();
+            populateTenantSelect(); // เพิ่มการเรียกใช้ฟังก์ชันนี้ที่นี่
         })
         .catch(error => console.error('Error fetching tenants:', error));
 }
@@ -205,12 +205,10 @@ function populateTenantSelect() {
         tenantSelect.appendChild(option);
     } else {
         tenants.forEach(tenant => {
-            if (tenant.rooms && tenant.rooms.room_number) {
-                const option = document.createElement('option');
-                option.value = tenant.id;
-                option.textContent = `${tenant.name} (ห้อง ${tenant.rooms.room_number})`;
-                tenantSelect.appendChild(option);
-            }
+            const option = document.createElement('option');
+            option.value = tenant.id;
+            option.textContent = `${tenant.name} (ห้อง ${tenant.rooms ? tenant.rooms.room_number : 'ไม่ระบุ'})`;
+            tenantSelect.appendChild(option);
         });
     }
     console.log('Populated tenant select:', tenantSelect.innerHTML);
