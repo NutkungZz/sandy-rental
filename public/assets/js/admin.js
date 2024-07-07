@@ -11,11 +11,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     initializeMonthYearFilter();
-    fetchTenants()
-        .then(() => fetchRooms())
-        .then(() => fetchPayments())
+    
+    Promise.all([fetchTenants(), fetchRooms()])
+        .then(() => {
+            populateTenantSelect();
+            return fetchPayments();
+        })
+        .then(() => {
+            console.log('All data loaded successfully');
+        })
         .catch(error => console.error('Error initializing data:', error));
 
+    // Event listeners
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('addTenantForm').addEventListener('submit', handleAddTenant);
     document.getElementById('editTenantForm').addEventListener('submit', handleEditTenant);
@@ -23,6 +30,33 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('editRoomForm').addEventListener('submit', handleEditRoom);
     document.getElementById('paymentForm').addEventListener('submit', handleAddPayment);
     document.getElementById('monthYearFilter').addEventListener('change', fetchPayments);
+
+    // Tab change listeners
+    document.getElementById('tenants-tab').addEventListener('click', function() {
+        displayTenants();
+    });
+    document.getElementById('rooms-tab').addEventListener('click', function() {
+        displayRooms();
+    });
+    document.getElementById('payments-tab').addEventListener('click', function() {
+        fetchPayments();
+    });
+
+    // Initialize tooltips and popovers if you're using them
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl);
+    });
+
+    // Optionally, you can add more initialization code here
+    // For example, setting up any global event handlers, initializing third-party libraries, etc.
+
+    console.log('DOM fully loaded and parsed');
 });
 
 function fetchTenants() {
