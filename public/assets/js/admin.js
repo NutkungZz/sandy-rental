@@ -94,13 +94,10 @@ function initializeMonthYearFilter() {
         option.value = optionValue;
         option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
         select.appendChild(option);
-        
-        if (optionValue === currentMonth) {
-            option.selected = true;
-        }
     }
     
-    currentMonthYear = select.value;
+    select.value = currentMonth;
+    currentMonthYear = currentMonth;
     console.log('Initial month-year filter value:', currentMonthYear);
     console.log('monthYearFilter element:', select);
     console.log('monthYearFilter value after initialization:', select.value);
