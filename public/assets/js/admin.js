@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     initializeMonthYearFilter();
+    populatePaymentMonthSelect(); // เพิ่มบรรทัดนี้
     
     Promise.all([fetchTenants(), fetchRooms()])
         .then(() => {
@@ -82,23 +83,20 @@ function fetchRooms() {
 function initializeMonthYearFilter() {
     const select = document.getElementById('monthYearFilter');
     const today = new Date();
-    const currentMonth = today.toISOString().slice(0, 7);
     
-    // เพิ่มตัวเลือกสำหรับ 3 เดือนในอนาคต และ 12 เดือนย้อนหลัง
     for (let i = 3; i >= -12; i--) {
         const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
         const optionValue = d.toISOString().slice(0, 7);
         const option = document.createElement('option');
         option.value = optionValue;
         
-        // แปลง ค.ศ. เป็น พ.ศ.
         const buddhistYear = d.getFullYear() + 543;
         const thaiMonth = d.toLocaleString('th-TH', { month: 'long' });
         option.text = `${thaiMonth} ${buddhistYear}`;
         
         select.appendChild(option);
         
-        if (optionValue === currentMonth) {
+        if (i === 0) {
             option.selected = true;
         }
     }
@@ -263,13 +261,13 @@ function populateTenantSelect() {
     tenantSelect.innerHTML = '<option value="">เลือกผู้เช่า</option>';
     
     tenants.forEach(tenant => {
-        const option = document.createElement('option');
-        option.value = tenant.id;
-        option.textContent = `${tenant.name} (ห้อง ${tenant.rooms.room_number})`;
-        tenantSelect.appendChild(option);
+        if (tenant.rooms) {
+            const option = document.createElement('option');
+            option.value = tenant.id;
+            option.textContent = `${tenant.name} (ห้อง ${tenant.rooms.room_number})`;
+            tenantSelect.appendChild(option);
+        }
     });
-
-    //console.log('Tenant select populated:', tenantSelect.innerHTML);
 }
 
 function handleAddTenant(e) {
@@ -460,10 +458,8 @@ function deleteRoom(id) {
     }
 }
 
-function showPaymentModal(tenantId, roomId) {
-    document.getElementById('paymentTenantId').value = tenantId;
-    document.getElementById('paymentRoomId').value = roomId;
-    
+function showPaymentModal() {
+    populateTenantSelect();
     populatePaymentMonthSelect();
     
     // ตั้งค่าเริ่มต้นสำหรับวันที่ชำระเป็นวันปัจจุบัน
@@ -501,7 +497,6 @@ function handleAddPayment(e) {
     e.preventDefault();
     const paymentData = {
         tenant_id: parseInt(document.getElementById('paymentTenantId').value),
-        room_id: parseInt(document.getElementById('paymentRoomId').value),
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
         payment_method: document.getElementById('paymentMethod').value,
