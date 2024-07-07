@@ -411,6 +411,10 @@ function deleteRoom(id) {
 }
 
 function showPaymentModal(tenantId, roomId) {
+    console.log('Showing payment modal for tenant:', tenantId, 'room:', roomId);
+    const tenantSelect = document.getElementById('paymentTenantId');
+    console.log('Tenant select options:', tenantSelect.innerHTML);
+    
     document.getElementById('paymentTenantId').value = tenantId;
     document.getElementById('paymentRoomId').value = roomId;
     new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
