@@ -17,6 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
             populateTenantSelect();
         })
         .catch(error => console.error('Error initializing data:', error));
+    
+    document.getElementById('monthYearFilter').addEventListener('change', function() {
+        currentMonthYear = this.value;
+        console.log('Month-year filter changed to:', currentMonthYear);
+        fetchPayments();
+    });
 
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('addTenantForm').addEventListener('submit', handleAddTenant);
@@ -161,7 +167,8 @@ function displayRooms() {
 }
 
 function displayPayments() {
-    console.log('Displaying payments:', payments);
+    console.log('Displaying payments for:', currentMonthYear);
+    console.log('Available payments:', payments);
     const paymentTable = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
     paymentTable.innerHTML = '';
 
@@ -172,6 +179,8 @@ function displayPayments() {
     rooms.forEach(room => {
         const payment = payments.find(p => p.room_id === room.id && p.payment_for_month.startsWith(currentMonthYear));
         const tenant = tenants.find(t => t.room_id === room.id);
+
+        console.log(`Room ${room.room_number}:`, { payment, tenant });
 
         const row = paymentTable.insertRow();
         row.innerHTML = `
