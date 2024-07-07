@@ -51,30 +51,38 @@ function fetchRooms() {
 function initializeMonthYearFilter() {
     const select = document.getElementById('monthYearFilter');
     const today = new Date();
+    const currentMonth = today.toISOString().slice(0, 7);
+    
     for (let i = 0; i < 12; i++) {
         const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const optionValue = d.toISOString().slice(0, 7);
         const option = document.createElement('option');
-        option.value = d.toISOString().slice(0, 7);
+        option.value = optionValue;
         option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
         select.appendChild(option);
+        
+        if (optionValue === currentMonth) {
+            option.selected = true;
+        }
     }
-    const currentMonth = today.toISOString().slice(0, 7);
-    select.value = currentMonth;
-    currentMonthYear = currentMonth;
+    
+    currentMonthYear = select.value;
     console.log('Initial month-year filter value:', currentMonthYear);
-
-    //log on 20240707
-    console.log('monthYearFilter element:', document.getElementById('monthYearFilter'));
-    console.log('monthYearFilter value after initialization:', document.getElementById('monthYearFilter').value);
+    console.log('monthYearFilter element:', select);
+    console.log('monthYearFilter value after initialization:', select.value);
 }
 
 function fetchPayments() {
-    currentMonthYear = document.getElementById('monthYearFilter').value;
+    const select = document.getElementById('monthYearFilter');
+    currentMonthYear = select.value;
+    
     if (!currentMonthYear) {
-        console.error('No month selected');
-        showAlert('เกิดข้อผิดพลาด', 'กรุณาเลือกเดือน', 'error');
-        return Promise.resolve();
+        console.error('No month selected, setting to current month');
+        const today = new Date();
+        currentMonthYear = today.toISOString().slice(0, 7);
+        select.value = currentMonthYear;
     }
+    
     console.log('Fetching payments for:', currentMonthYear);
     return fetch(`/api/payments?month=${currentMonthYear}`)
         .then(response => {
