@@ -10,19 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    Promise.all([fetchTenants(), fetchRooms()])
-        .then(() => {
-            initializeMonthYearFilter();
-            fetchPayments();
-            populateTenantSelect();
-        })
+    initializeMonthYearFilter();
+    fetchTenants()
+        .then(() => fetchRooms())
+        .then(() => fetchPayments())
         .catch(error => console.error('Error initializing data:', error));
-    
-    document.getElementById('monthYearFilter').addEventListener('change', function() {
-        currentMonthYear = this.value;
-        console.log('Month-year filter changed to:', currentMonthYear);
-        fetchPayments();
-    });
 
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('addTenantForm').addEventListener('submit', handleAddTenant);
@@ -66,8 +58,9 @@ function initializeMonthYearFilter() {
         option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
         select.appendChild(option);
     }
-    select.value = today.toISOString().slice(0, 7); // Set default value to current month
-    currentMonthYear = select.value;
+    const currentMonth = today.toISOString().slice(0, 7);
+    select.value = currentMonth;
+    currentMonthYear = currentMonth;
     console.log('Initial month-year filter value:', currentMonthYear);
 }
 
