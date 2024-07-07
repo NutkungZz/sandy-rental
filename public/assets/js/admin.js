@@ -65,7 +65,7 @@ function initializeMonthYearFilter() {
 
 function fetchPayments() {
     currentMonthYear = document.getElementById('monthYearFilter').value;
-    console.log('Fetching payments for:', currentMonthYear);
+    console.log('Selected month for payments:', currentMonthYear);
     return fetch(`/api/payments?month=${currentMonthYear}`)
         .then(response => {
             if (!response.ok) {
