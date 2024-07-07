@@ -62,6 +62,10 @@ function initializeMonthYearFilter() {
     select.value = currentMonth;
     currentMonthYear = currentMonth;
     console.log('Initial month-year filter value:', currentMonthYear);
+
+    //log on 20240707
+    console.log('monthYearFilter element:', document.getElementById('monthYearFilter'));
+    console.log('monthYearFilter value after initialization:', document.getElementById('monthYearFilter').value);
 }
 
 function fetchPayments() {
