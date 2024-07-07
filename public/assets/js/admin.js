@@ -86,7 +86,7 @@ function initializeMonthYearFilter() {
     
     for (let i = 3; i >= -12; i--) {
         const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
-        const optionValue = d.toISOString().slice(0, 7); // This will be in format 'YYYY-MM'
+        const optionValue = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         const option = document.createElement('option');
         option.value = optionValue;
         
@@ -477,7 +477,7 @@ function populatePaymentMonthSelect() {
     
     for (let i = 3; i >= -3; i--) {
         const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
-        const optionValue = d.toISOString().slice(0, 7); // This will be in format 'YYYY-MM'
+        const optionValue = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
         const option = document.createElement('option');
         option.value = optionValue;
         
