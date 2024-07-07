@@ -94,13 +94,23 @@ function initializeMonthYearFilter() {
         option.value = optionValue;
         option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
         select.appendChild(option);
+        
+        if (optionValue === currentMonth) {
+            option.selected = true;
+        }
     }
     
-    select.value = currentMonth;
-    currentMonthYear = currentMonth;
+    currentMonthYear = select.value;
     console.log('Initial month-year filter value:', currentMonthYear);
     console.log('monthYearFilter element:', select);
     console.log('monthYearFilter value after initialization:', select.value);
+    
+    // เพิ่มการตรวจสอบและแก้ไขค่าถ้าจำเป็น
+    if (!currentMonthYear) {
+        currentMonthYear = currentMonth;
+        select.value = currentMonth;
+        console.log('Corrected month-year filter value:', currentMonthYear);
+    }
 }
 
 function fetchPayments() {
