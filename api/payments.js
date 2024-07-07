@@ -8,31 +8,31 @@ module.exports = async (req, res) => {
     const { method } = req;
 
     switch (method) {
-        case 'GET':
-            try {
-                const { month } = req.query;
-                
-                const { data, error } = await supabase
-                    .from('payments')
-                    .select(`
-                        id,
-                        tenant_id,
-                        amount,
-                        payment_date,
-                        payment_method,
-                        payment_for_month,
-                        tenants(id, name),
-                        rooms(id, room_number)
-                    `)
-                    .eq('payment_for_month', month + '-01')
-                    .order('payment_date', { ascending: false });
-                
-                if (error) throw error;
-                res.status(200).json(data);
-            } catch (error) {
-                res.status(400).json({ success: false, message: error.message });
-            }
-            break;
+    case 'GET':
+        try {
+            const { month } = req.query;
+            
+            const { data, error } = await supabase
+                .from('payments')
+                .select(`
+                    id,
+                    tenant_id,
+                    room_id,
+                    amount,
+                    payment_date,
+                    payment_method,
+                    payment_for_month,
+                    tenants (id, name),
+                    rooms (id, room_number)
+                `)
+                .eq('payment_for_month', month + '-01');
+            
+            if (error) throw error;
+            res.status(200).json(data);
+        } catch (error) {
+            res.status(400).json({ success: false, message: error.message });
+        }
+        break;
 
         case 'POST':
             try {
