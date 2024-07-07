@@ -530,6 +530,30 @@ function handleAddPayment(e) {
     });
 }
 
+function populatePaymentMonthSelect() {
+    const select = document.getElementById('paymentForMonth');
+    const today = new Date();
+    
+    select.innerHTML = ''; // Clear existing options
+    
+    for (let i = 3; i >= -3; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+        const optionValue = d.toISOString().slice(0, 7);
+        const option = document.createElement('option');
+        option.value = optionValue;
+        
+        const buddhistYear = d.getFullYear() + 543;
+        const thaiMonth = d.toLocaleString('th-TH', { month: 'long' });
+        option.text = `${thaiMonth} ${buddhistYear}`;
+        
+        select.appendChild(option);
+        
+        if (i === 0) {
+            option.selected = true;
+        }
+    }
+}
+
 function showAlert(title, message, icon) {
     Swal.fire({
         title: title,
