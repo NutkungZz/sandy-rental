@@ -14,6 +14,11 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMonthYearFilter();
     fetchPayments();
 
+    //ตรวจสอบว่าฟังก์ชัน populateTenantSelect() ถูกเรียกหลังจากที่ข้อมูลผู้เช่าถูกโหลดเรียบร้อยแล้ว:
+    fetchTenants().then(() => {
+        populateTenantSelect();
+    });
+
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('addTenantForm').addEventListener('submit', handleAddTenant);
     document.getElementById('editTenantForm').addEventListener('submit', handleEditTenant);
@@ -220,13 +225,16 @@ function populateRoomSelect() {
 
 function populateTenantSelect() {
     const tenantSelect = document.getElementById('paymentTenantId');
-    tenantSelect.innerHTML = '';
+    tenantSelect.innerHTML = '<option value="">เลือกผู้เช่า</option>';
     tenants.forEach(tenant => {
-        const option = document.createElement('option');
-        option.value = tenant.id;
-        option.textContent = `${tenant.name} (ห้อง ${tenant.rooms.room_number})`;
-        tenantSelect.appendChild(option);
+        if (tenant.room_id) { // เพิ่มเงื่อนไขนี้เพื่อแสดงเฉพาะผู้เช่าที่มีห้องเช่า
+            const option = document.createElement('option');
+            option.value = tenant.id;
+            option.textContent = `${tenant.name} (ห้อง ${tenant.rooms.room_number})`;
+            tenantSelect.appendChild(option);
+        }
     });
+    console.log('Populated tenant select:', tenantSelect.innerHTML); // เพิ่ม log นี้
 }
 
 function handleAddTenant(e) {
