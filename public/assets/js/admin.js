@@ -73,6 +73,11 @@ function initializeMonthYearFilter() {
 
 function fetchPayments() {
     currentMonthYear = document.getElementById('monthYearFilter').value;
+    if (!currentMonthYear) {
+        console.error('No month selected');
+        showAlert('เกิดข้อผิดพลาด', 'กรุณาเลือกเดือน', 'error');
+        return Promise.resolve();
+    }
     console.log('Fetching payments for:', currentMonthYear);
     return fetch(`/api/payments?month=${currentMonthYear}`)
         .then(response => {
@@ -181,7 +186,7 @@ function displayPayments() {
     let totalAmount = 0;
 
     rooms.forEach(room => {
-        const payment = payments.find(p => p.room_id === room.id && p.payment_for_month.startsWith(currentMonthYear));
+        const payment = payments.find(p => p.room_id === room.id);
         const tenant = tenants.find(t => t.room_id === room.id);
 
         console.log(`Room ${room.room_number}:`, { payment, tenant });
