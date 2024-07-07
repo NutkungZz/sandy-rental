@@ -87,8 +87,9 @@ function initializeMonthYearFilter() {
     const today = new Date();
     const currentMonth = today.toISOString().slice(0, 7);
     
-    for (let i = 0; i < 12; i++) {
-        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+    // เพิ่มตัวเลือกสำหรับ 3 เดือนในอนาคต และ 12 เดือนย้อนหลัง
+    for (let i = 3; i >= -12; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
         const optionValue = d.toISOString().slice(0, 7);
         const option = document.createElement('option');
         option.value = optionValue;
@@ -496,17 +497,16 @@ function showPaymentModal(tenantId, roomId) {
 
 function handleAddPayment(e) {
     e.preventDefault();
-    const paymentForMonth = document.getElementById('paymentForMonth').value;
     const paymentData = {
         tenant_id: parseInt(document.getElementById('paymentTenantId').value),
         room_id: parseInt(document.getElementById('paymentRoomId').value),
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
         payment_method: document.getElementById('paymentMethod').value,
-        payment_for_month: paymentForMonth + '-01' // กำหนดเป็นวันที่ 1 ของเดือนที่เลือก
+        payment_for_month: document.getElementById('paymentForMonth').value // เพิ่มฟิลด์นี้ในฟอร์ม
     };
 
-    console.log('Submitting payment data:', paymentData); // เพิ่ม log เพื่อตรวจสอบข้อมูล
+    console.log('Submitting payment data:', paymentData);
 
     fetch('/api/payments', {
         method: 'POST',
@@ -523,8 +523,6 @@ function handleAddPayment(e) {
         modal.hide();
         showAlert('บันทึกการชำระเงินสำเร็จ', 'ข้อมูลการชำระเงินได้รับการบันทึกเรียบร้อยแล้ว', 'success');
         document.getElementById('paymentForm').reset();
-        currentMonthYear = document.getElementById('paymentForMonth').value.slice(0, 7);
-        return fetchPayments();
     })
     .catch(error => {
         console.error('Error adding payment:', error);
