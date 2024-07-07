@@ -8,10 +8,20 @@ module.exports = async (req, res) => {
     const { method } = req;
 
     switch (method) {
-     case 'GET':
+    case 'GET':
         try {
             const { month } = req.query;
-            
+            console.log('Received request for payments. Month:', month);
+    
+            if (!month || !/^\d{4}-\d{2}$/.test(month)) {
+                throw new Error('Invalid month format. Expected YYYY-MM');
+            }
+    
+            const startDate = `${month}-01`;
+            const endDate = new Date(month.slice(0, 4), month.slice(5, 7), 0).toISOString().split('T')[0];
+    
+            console.log('Fetching payments from', startDate, 'to', endDate);
+    
             const { data, error } = await supabase
                 .from('payments')
                 .select(`
@@ -23,13 +33,16 @@ module.exports = async (req, res) => {
                     payment_method,
                     payment_for_month
                 `)
-                .gte('payment_for_month', month + '-01')
-                .lt('payment_for_month', month + '-31')
-                .order('payment_date', { ascending: false });
+                .gte('payment_for_month', startDate)
+                .lte('payment_for_month', endDate);
             
             if (error) throw error;
+    
+            console.log('Fetched payments:', data);
+    
             res.status(200).json(data);
         } catch (error) {
+            console.error('Error in GET /api/payments:', error);
             res.status(400).json({ success: false, message: error.message });
         }
         break;
