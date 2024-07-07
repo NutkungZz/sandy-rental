@@ -40,11 +40,12 @@ function fetchTenants() {
     fetch('/api/tenants')
         .then(response => response.json())
         .then(data => {
+            console.log('Fetched tenants:', data); // เพิ่ม log นี้
             tenants = data;
             displayTenants();
             populateTenantSelect();
         })
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Error fetching tenants:', error));
 }
 
 function fetchRooms() {
