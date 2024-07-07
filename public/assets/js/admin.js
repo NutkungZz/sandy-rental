@@ -92,7 +92,11 @@ function initializeMonthYearFilter() {
         const optionValue = d.toISOString().slice(0, 7);
         const option = document.createElement('option');
         option.value = optionValue;
-        option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${d.getFullYear() + 543}`;
+        
+        // แปลง ค.ศ. เป็น พ.ศ.
+        const buddhistYear = d.getFullYear() + 543;
+        option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${buddhistYear}`;
+        
         select.appendChild(option);
         
         if (optionValue === currentMonth) {
@@ -104,13 +108,18 @@ function initializeMonthYearFilter() {
     console.log('Initial month-year filter value:', currentMonthYear);
     console.log('monthYearFilter element:', select);
     console.log('monthYearFilter value after initialization:', select.value);
-    
-    // เพิ่มการตรวจสอบและแก้ไขค่าถ้าจำเป็น
-    if (!currentMonthYear) {
-        currentMonthYear = currentMonth;
-        select.value = currentMonth;
-        console.log('Corrected month-year filter value:', currentMonthYear);
-    }
+}
+
+function convertToThaiDate(date) {
+    const thaiYear = date.getFullYear() + 543;
+    const thaiMonth = date.toLocaleString('th-TH', { month: 'long' });
+    return `${thaiMonth} ${thaiYear}`;
+}
+
+function getISOStringWithoutTimeZone(date) {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    return `${year}-${month}`;
 }
 
 function fetchPayments() {
@@ -120,7 +129,7 @@ function fetchPayments() {
     if (!currentMonthYear) {
         console.error('No month selected, setting to current month');
         const today = new Date();
-        currentMonthYear = today.toISOString().slice(0, 7);
+        currentMonthYear = getISOStringWithoutTimeZone(today);
         select.value = currentMonthYear;
     }
     
@@ -222,6 +231,7 @@ function displayRooms() {
 }
 
 function displayPayments() {
+     console.log('Displaying payments for:', convertToThaiDate(new Date(currentMonthYear)));
     console.log('Displaying payments for:', currentMonthYear);
     console.log('Available payments:', payments);
     const paymentTable = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
