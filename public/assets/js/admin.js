@@ -75,13 +75,22 @@ function fetchPayments() {
     currentMonthYear = document.getElementById('monthYearFilter').value;
     console.log('Fetching payments for:', currentMonthYear);
     fetch(`/api/payments?month=${currentMonthYear}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             console.log('Received payments data:', data);
             payments = data;
             displayPayments();
         })
-        .catch(error => console.error('Error fetching payments:', error));
+        .catch(error => {
+            console.error('Error fetching payments:', error);
+            payments = []; // ตั้งค่าให้เป็น array ว่างเมื่อเกิดข้อผิดพลาด
+            displayPayments();
+        });
 }
 
 function displayTenants() {
@@ -169,7 +178,7 @@ function displayPayments() {
     let totalAmount = 0;
 
     rooms.forEach(room => {
-        const payment = payments.find(p => p.rooms.id === room.id);
+        const payment = payments.find(p => p.room_id === room.id);
         const tenant = tenants.find(t => t.room_id === room.id);
 
         const row = paymentTable.insertRow();
@@ -179,7 +188,7 @@ function displayPayments() {
             <td>${payment ? '<span class="badge bg-success">ชำระแล้ว</span>' : '<span class="badge bg-warning">ยังไม่ชำระ</span>'}</td>
             <td>${payment ? `${payment.amount} บาท` : '-'}</td>
             <td>${payment ? formatDate(payment.payment_date) : '-'}</td>
-            <td>${tenant ? `<button class="btn btn-sm btn-primary" onclick="showPaymentModal(${tenant.id})">บันทึกการชำระเงิน</button>` : '-'}</td>
+            <td>${tenant ? `<button class="btn btn-sm btn-primary" onclick="showPaymentModal(${tenant.id}, ${room.id})">บันทึกการชำระเงิน</button>` : '-'}</td>
         `;
 
         if (payment) {
@@ -407,19 +416,18 @@ function deleteRoom(id) {
     }
 }
 
-function showPaymentModal(tenantId) {
-    const tenant = tenants.find(t => t.id === tenantId);
-    if (tenant) {
-        document.getElementById('paymentTenantId').value = tenant.id;
-        document.getElementById('paymentMonth').value = currentMonthYear;
-        new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
-    }
+function showPaymentModal(tenantId, roomId) {
+    document.getElementById('paymentTenantId').value = tenantId;
+    document.getElementById('paymentRoomId').value = roomId;
+    new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
 }
+
 
 function handleAddPayment(e) {
     e.preventDefault();
     const paymentData = {
         tenant_id: parseInt(document.getElementById('paymentTenantId').value),
+        room_id: parseInt(document.getElementById('paymentRoomId').value),
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
         payment_method: document.getElementById('paymentMethod').value,
