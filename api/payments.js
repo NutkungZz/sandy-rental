@@ -8,7 +8,7 @@ module.exports = async (req, res) => {
     const { method } = req;
 
     switch (method) {
-    case 'GET':
+     case 'GET':
         try {
             const { month } = req.query;
             
@@ -21,11 +21,11 @@ module.exports = async (req, res) => {
                     amount,
                     payment_date,
                     payment_method,
-                    payment_for_month,
-                    tenants (id, name),
-                    rooms (id, room_number)
+                    payment_for_month
                 `)
-                .eq('payment_for_month', month + '-01');
+                .gte('payment_for_month', month + '-01')
+                .lt('payment_for_month', month + '-31')
+                .order('payment_date', { ascending: false });
             
             if (error) throw error;
             res.status(200).json(data);
