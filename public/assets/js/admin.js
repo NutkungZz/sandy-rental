@@ -398,12 +398,17 @@ function deleteRoom(id) {
 }
 
 function showPaymentModal(tenantId, roomId) {
-    console.log('Showing payment modal for tenant:', tenantId, 'room:', roomId);
-    const tenantSelect = document.getElementById('paymentTenantId');
-    console.log('Tenant select options:', tenantSelect.innerHTML);
-    
     document.getElementById('paymentTenantId').value = tenantId;
     document.getElementById('paymentRoomId').value = roomId;
+    
+    // ตั้งค่าเริ่มต้นสำหรับเดือนที่ต้องการชำระเป็นเดือนปัจจุบัน
+    const currentDate = new Date();
+    const currentMonth = currentDate.toISOString().slice(0, 7); // รูปแบบ YYYY-MM
+    document.getElementById('paymentForMonth').value = currentMonth;
+    
+    // ตั้งค่าเริ่มต้นสำหรับวันที่ชำระเป็นวันปัจจุบัน
+    document.getElementById('paymentDate').value = currentDate.toISOString().slice(0, 10); // รูปแบบ YYYY-MM-DD
+
     new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
 }
 
