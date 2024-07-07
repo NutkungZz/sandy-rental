@@ -36,19 +36,32 @@ module.exports = async (req, res) => {
 
         case 'POST':
             try {
-                const { tenant_id, amount, payment_date, payment_method, payment_for_month } = req.body;
-
-                if (!tenant_id || !amount || !payment_date || !payment_method || !payment_for_month) {
+                const { tenant_id, room_id, amount, payment_date, payment_method, payment_for_month } = req.body;
+                
+                console.log('Received payment data:', req.body); // เพิ่ม log นี้เพื่อตรวจสอบข้อมูลที่ได้รับ
+        
+                if (!tenant_id || !room_id || !amount || !payment_date || !payment_method || !payment_for_month) {
                     throw new Error('Missing required fields');
                 }
-
+        
                 const { data, error } = await supabase
                     .from('payments')
-                    .insert({ tenant_id, amount, payment_date, payment_method, payment_for_month });
+                    .insert({ 
+                        tenant_id, 
+                        room_id, 
+                        amount, 
+                        payment_date, 
+                        payment_method, 
+                        payment_for_month 
+                    });
                 
                 if (error) throw error;
+                
+                console.log('Inserted payment data:', data); // เพิ่ม log นี้เพื่อตรวจสอบข้อมูลที่ถูกบันทึก
+                
                 res.status(201).json(data);
             } catch (error) {
+                console.error('Error in POST /api/payments:', error); // เพิ่ม log นี้เพื่อตรวจสอบข้อผิดพลาด
                 res.status(400).json({ success: false, message: error.message });
             }
             break;
