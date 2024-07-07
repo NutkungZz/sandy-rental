@@ -53,9 +53,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Popover(popoverTriggerEl);
     });
 
-    // Optionally, you can add more initialization code here
-    // For example, setting up any global event handlers, initializing third-party libraries, etc.
-
     console.log('DOM fully loaded and parsed');
 });
 
@@ -66,7 +63,7 @@ function fetchTenants() {
             console.log('Fetched tenants:', data);
             tenants = data;
             displayTenants();
-            populateTenantSelect(); // เพิ่มการเรียกใช้ฟังก์ชันนี้ที่นี่
+            populateTenantSelect();
         })
         .catch(error => console.error('Error fetching tenants:', error));
 }
@@ -108,8 +105,6 @@ function initializeMonthYearFilter() {
     
     currentMonthYear = select.value;
     console.log('Initial month-year filter value:', currentMonthYear);
-    console.log('monthYearFilter element:', select);
-    console.log('monthYearFilter value after initialization:', select.value);
 }
 
 function convertToThaiDate(dateString) {
@@ -119,27 +114,12 @@ function convertToThaiDate(dateString) {
     return `${thaiMonth} ${thaiYear}`;
 }
 
-function getISOStringWithoutTimeZone(date) {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    return `${year}-${month}`;
-}
-
 function fetchPayments() {
     const select = document.getElementById('monthYearFilter');
     currentMonthYear = select.value;
 
     console.log('Selected month-year:', currentMonthYear);
-    console.log('Selected option text:', select.options[select.selectedIndex].text);
     
-    if (!currentMonthYear) {
-        console.error('No month selected, setting to current month');
-        const today = new Date();
-        currentMonthYear = getISOStringWithoutTimeZone(today);
-        select.value = currentMonthYear;
-    }
-    
-    console.log('Fetching payments for:', currentMonthYear);
     return fetch(`/api/payments?month=${currentMonthYear}`)
         .then(response => {
             if (!response.ok) {
@@ -484,50 +464,13 @@ function showPaymentModal(tenantId, roomId) {
     document.getElementById('paymentTenantId').value = tenantId;
     document.getElementById('paymentRoomId').value = roomId;
     
-    // ตั้งค่าเริ่มต้นสำหรับเดือนที่ต้องการชำระเป็นเดือนปัจจุบัน
-    const currentDate = new Date();
-    const currentMonth = currentDate.toISOString().slice(0, 7); // รูปแบบ YYYY-MM
-    document.getElementById('paymentForMonth').value = currentMonth;
+    populatePaymentMonthSelect();
     
     // ตั้งค่าเริ่มต้นสำหรับวันที่ชำระเป็นวันปัจจุบัน
+    const currentDate = new Date();
     document.getElementById('paymentDate').value = currentDate.toISOString().slice(0, 10); // รูปแบบ YYYY-MM-DD
 
     new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
-}
-
-function handleAddPayment(e) {
-    e.preventDefault();
-    const paymentData = {
-        tenant_id: parseInt(document.getElementById('paymentTenantId').value),
-        room_id: parseInt(document.getElementById('paymentRoomId').value),
-        amount: parseFloat(document.getElementById('paymentAmount').value),
-        payment_date: document.getElementById('paymentDate').value,
-        payment_method: document.getElementById('paymentMethod').value,
-        payment_for_month: document.getElementById('paymentForMonth').value // เพิ่มฟิลด์นี้ในฟอร์ม
-    };
-
-    console.log('Submitting payment data:', paymentData);
-
-    fetch('/api/payments', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(paymentData),
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Payment added successfully:', data);
-        fetchPayments();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
-        modal.hide();
-        showAlert('บันทึกการชำระเงินสำเร็จ', 'ข้อมูลการชำระเงินได้รับการบันทึกเรียบร้อยแล้ว', 'success');
-        document.getElementById('paymentForm').reset();
-    })
-    .catch(error => {
-        console.error('Error adding payment:', error);
-        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกการชำระเงินได้ กรุณาลองใหม่อีกครั้ง', 'error');
-    });
 }
 
 function populatePaymentMonthSelect() {
@@ -552,6 +495,41 @@ function populatePaymentMonthSelect() {
             option.selected = true;
         }
     }
+}
+
+function handleAddPayment(e) {
+    e.preventDefault();
+    const paymentData = {
+        tenant_id: parseInt(document.getElementById('paymentTenantId').value),
+        room_id: parseInt(document.getElementById('paymentRoomId').value),
+        amount: parseFloat(document.getElementById('paymentAmount').value),
+        payment_date: document.getElementById('paymentDate').value,
+        payment_method: document.getElementById('paymentMethod').value,
+        payment_for_month: document.getElementById('paymentForMonth').value
+    };
+
+    console.log('Submitting payment data:', paymentData);
+
+    fetch('/api/payments', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(paymentData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Payment added successfully:', data);
+        fetchPayments();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
+        modal.hide();
+        showAlert('บันทึกการชำระเงินสำเร็จ', 'ข้อมูลการชำระเงินได้รับการบันทึกเรียบร้อยแล้ว', 'success');
+        document.getElementById('paymentForm').reset();
+    })
+    .catch(error => {
+        console.error('Error adding payment:', error);
+        showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถบันทึกการชำระเงินได้ กรุณาลองใหม่อีกครั้ง', 'error');
+    });
 }
 
 function showAlert(title, message, icon) {
