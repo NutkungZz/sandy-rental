@@ -95,7 +95,8 @@ function initializeMonthYearFilter() {
         
         // แปลง ค.ศ. เป็น พ.ศ.
         const buddhistYear = d.getFullYear() + 543;
-        option.text = `${d.toLocaleString('th-TH', { month: 'long' })} ${buddhistYear}`;
+        const thaiMonth = d.toLocaleString('th-TH', { month: 'long' });
+        option.text = `${thaiMonth} ${buddhistYear}`;
         
         select.appendChild(option);
         
@@ -110,7 +111,8 @@ function initializeMonthYearFilter() {
     console.log('monthYearFilter value after initialization:', select.value);
 }
 
-function convertToThaiDate(date) {
+function convertToThaiDate(dateString) {
+    const date = new Date(dateString);
     const thaiYear = date.getFullYear() + 543;
     const thaiMonth = date.toLocaleString('th-TH', { month: 'long' });
     return `${thaiMonth} ${thaiYear}`;
@@ -125,6 +127,9 @@ function getISOStringWithoutTimeZone(date) {
 function fetchPayments() {
     const select = document.getElementById('monthYearFilter');
     currentMonthYear = select.value;
+
+    console.log('Selected month-year:', currentMonthYear);
+    console.log('Selected option text:', select.options[select.selectedIndex].text);
     
     if (!currentMonthYear) {
         console.error('No month selected, setting to current month');
@@ -231,9 +236,11 @@ function displayRooms() {
 }
 
 function displayPayments() {
-     console.log('Displaying payments for:', convertToThaiDate(new Date(currentMonthYear)));
+
+    console.log('Displaying payments for:', convertToThaiDate(currentMonthYear));
     console.log('Displaying payments for:', currentMonthYear);
     console.log('Available payments:', payments);
+    
     const paymentTable = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
     paymentTable.innerHTML = '';
 
