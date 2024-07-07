@@ -198,22 +198,30 @@ function displayPayments() {
 function populateTenantSelect() {
     const tenantSelect = document.getElementById('paymentTenantId');
     tenantSelect.innerHTML = '<option value="">เลือกผู้เช่า</option>';
-    if (tenants.length === 0) {
+    
+    console.log('Populating tenant select. Tenants:', tenants);
+    
+    if (!tenants || tenants.length === 0) {
         const option = document.createElement('option');
         option.textContent = 'ไม่พบข้อมูลผู้เช่า';
         option.disabled = true;
         tenantSelect.appendChild(option);
     } else {
         tenants.forEach(tenant => {
-            const option = document.createElement('option');
-            option.value = tenant.id;
-            option.textContent = `${tenant.name} (ห้อง ${tenant.rooms ? tenant.rooms.room_number : 'ไม่ระบุ'})`;
-            tenantSelect.appendChild(option);
+            if (tenant && tenant.id) {
+                const option = document.createElement('option');
+                option.value = tenant.id;
+                option.textContent = `${tenant.name} (ห้อง ${tenant.rooms ? tenant.rooms.room_number : 'ไม่ระบุ'})`;
+                tenantSelect.appendChild(option);
+                console.log('Added tenant option:', option.textContent);
+            } else {
+                console.warn('Invalid tenant data:', tenant);
+            }
         });
     }
+    
     console.log('Populated tenant select:', tenantSelect.innerHTML);
 }
-
 function handleAddTenant(e) {
     e.preventDefault();
     const tenantData = {
