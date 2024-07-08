@@ -503,13 +503,16 @@ function populatePaymentMonthSelect() {
 
 function handleAddPayment(e) {
     e.preventDefault();
+    const paymentForMonth = document.getElementById('paymentForMonth').value;
+    const [year, month] = paymentForMonth.split('-');
     const paymentData = {
         tenant_id: parseInt(document.getElementById('paymentTenantId').value),
         room_id: parseInt(document.getElementById('paymentRoomId').value),
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
         payment_method: document.getElementById('paymentMethod').value,
-        payment_for_month: document.getElementById('paymentForMonth').value
+        payment_for_year: parseInt(year),
+        payment_for_month: parseInt(month)
     };
 
     console.log('Submitting payment data:', paymentData);
