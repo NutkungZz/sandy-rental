@@ -458,13 +458,23 @@ function deleteRoom(id) {
     }
 }
 
-function showPaymentModal() {
-    populateTenantSelect();
+function showPaymentModal(tenantId, roomId) {
+    document.getElementById('paymentTenantId').value = tenantId;
+    document.getElementById('paymentRoomId').value = roomId;
+    
+    // ตั้งค่าเริ่มต้นสำหรับผู้เช่าและห้อง
+    const tenant = tenants.find(t => t.id === tenantId);
+    if (tenant) {
+        document.getElementById('paymentTenantId').value = tenant.id;
+        document.getElementById('paymentTenantName').textContent = tenant.name;
+        document.getElementById('paymentRoomNumber').textContent = tenant.rooms.room_number;
+    }
+    
     populatePaymentMonthSelect();
     
     // ตั้งค่าเริ่มต้นสำหรับวันที่ชำระเป็นวันปัจจุบัน
     const currentDate = new Date();
-    document.getElementById('paymentDate').value = currentDate.toISOString().slice(0, 10); // รูปแบบ YYYY-MM-DD
+    document.getElementById('paymentDate').value = currentDate.toISOString().slice(0, 10);
 
     new bootstrap.Modal(document.getElementById('addPaymentModal')).show();
 }
@@ -497,6 +507,7 @@ function handleAddPayment(e) {
     e.preventDefault();
     const paymentData = {
         tenant_id: parseInt(document.getElementById('paymentTenantId').value),
+        room_id: parseInt(document.getElementById('paymentRoomId').value),
         amount: parseFloat(document.getElementById('paymentAmount').value),
         payment_date: document.getElementById('paymentDate').value,
         payment_method: document.getElementById('paymentMethod').value,
@@ -515,11 +526,15 @@ function handleAddPayment(e) {
     .then(response => response.json())
     .then(data => {
         console.log('Payment added successfully:', data);
-        fetchPayments();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
-        modal.hide();
-        showAlert('บันทึกการชำระเงินสำเร็จ', 'ข้อมูลการชำระเงินได้รับการบันทึกเรียบร้อยแล้ว', 'success');
-        document.getElementById('paymentForm').reset();
+        if (data.success) {
+            fetchPayments();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addPaymentModal'));
+            modal.hide();
+            showAlert('บันทึกการชำระเงินสำเร็จ', 'ข้อมูลการชำระเงินได้รับการบันทึกเรียบร้อยแล้ว', 'success');
+            document.getElementById('paymentForm').reset();
+        } else {
+            showAlert('เกิดข้อผิดพลาด', data.message || 'ไม่สามารถบันทึกการชำระเงินได้ กรุณาลองใหม่อีกครั้ง', 'error');
+        }
     })
     .catch(error => {
         console.error('Error adding payment:', error);
