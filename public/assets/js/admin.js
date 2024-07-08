@@ -215,9 +215,7 @@ function displayRooms() {
 }
 
 function displayPayments() {
-
     console.log('Displaying payments for:', convertToThaiDate(currentMonthYear));
-    console.log('Displaying payments for:', currentMonthYear);
     console.log('Available payments:', payments);
     
     const paymentTable = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
