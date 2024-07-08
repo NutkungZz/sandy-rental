@@ -223,7 +223,6 @@
     </div>
     
  <!-- Modal สำหรับบันทึกการชำระเงิน -->
-
 <div class="modal fade" id="addPaymentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -233,11 +232,13 @@
             </div>
             <div class="modal-body">
                 <form id="paymentForm">
+                    <input type="hidden" id="paymentTenantId">
+                    <input type="hidden" id="paymentRoomId">
                     <div class="mb-3">
-                        <label for="paymentTenantId" class="form-label">ผู้เช่า</label>
-                        <select class="form-select" id="paymentTenantId" required>
-                            <!-- ตัวเลือกผู้เช่าจะถูกเพิ่มด้วย JavaScript -->
-                        </select>
+                        <label class="form-label">ผู้เช่า: <span id="paymentTenantName"></span></label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">ห้อง: <span id="paymentRoomNumber"></span></label>
                     </div>
                     <div class="mb-3">
                         <label for="paymentForMonth" class="form-label">เดือนที่ต้องการชำระ</label>
@@ -258,7 +259,6 @@
                         <select class="form-select" id="paymentMethod" required>
                             <option value="เงินสด">เงินสด</option>
                             <option value="โอนเงิน">โอนเงิน</option>
-                            <option value="บัตรเครดิต">บัตรเครดิต</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">บันทึก</button>
