@@ -90,58 +90,56 @@
                     </div>
                 </div>
             </div>
-            <div class="tab-pane fade" id="payments" role="tabpanel">
-                <h2>การชำระเงิน</h2>
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <select id="monthYearFilter" class="form-select">
-                            <!-- จะถูกเติมด้วย JavaScript -->
-                        </select>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">สรุปการชำระเงิน</h5>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="alert alert-success">
-                                    ชำระแล้ว: <span id="paidCount">0</span> ห้อง
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="alert alert-warning">
-                                    ยังไม่ชำระ: <span id="unpaidCount">0</span> ห้อง
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="alert alert-info">
-                                    ยอดรวม: <span id="totalAmount">0</span> บาท
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="mt-3">
-                    <table class="table table-striped" id="paymentsTable">
-                        <thead>
-                            <tr>
-                                <th>ห้อง</th>
-                                <th>ผู้เช่า</th>
-                                <th>สถานะ</th>
-                                <th>จำนวนเงิน</th>
-                                <th>วันที่ชำระ</th>
-                                <th>การดำเนินการ</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- ข้อมูลจะถูกเพิ่มด้วย JavaScript -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
+	<!-- tab การชำระเงิน -->
+	<div class="tab-pane fade" id="payments" role="tabpanel">
+	    <h4 class="mb-3">การชำระเงิน</h4>
+	    <div class="row mb-3">
+	        <div class="col-md-6 col-lg-4 mb-2">
+	            <select id="monthYearFilter" class="form-select form-select-sm">
+	                <!-- จะถูกเติมด้วย JavaScript -->
+	            </select>
+	        </div>
+	    </div>
+	    <div class="card mb-3">
+	        <div class="card-body">
+	            <h5 class="card-title h6">สรุปการชำระเงิน</h5>
+	            <div class="row">
+	                <div class="col-4">
+	                    <div class="alert alert-success py-2">
+	                        <small>ชำระแล้ว: <span id="paidCount" class="fw-bold">0</span></small>
+	                    </div>
+	                </div>
+	                <div class="col-4">
+	                    <div class="alert alert-warning py-2">
+	                        <small>ยังไม่ชำระ: <span id="unpaidCount" class="fw-bold">0</span></small>
+	                    </div>
+	                </div>
+	                <div class="col-4">
+	                    <div class="alert alert-info py-2">
+	                        <small>ยอดรวม: <span id="totalAmount" class="fw-bold">0</span> บาท</small>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	    <div class="table-responsive">
+	        <table class="table table-sm table-hover" id="paymentsTable">
+	            <thead>
+	                <tr>
+	                    <th>ห้อง</th>
+	                    <th>ผู้เช่า</th>
+	                    <th>สถานะ</th>
+	                    <th>จำนวนเงิน</th>
+	                    <th>วันที่ชำระ</th>
+	                    <th>การดำเนินการ</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	                <!-- ข้อมูลจะถูกเพิ่มด้วย JavaScript -->
+	            </tbody>
+	        </table>
+	    </div>
+	</div>
     <!-- Modal สำหรับเพิ่มผู้เช่า -->
     <div class="modal fade" id="addTenantModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
