@@ -8,55 +8,57 @@ module.exports = async (req, res) => {
     const { method } = req;
 
     switch (method) {
-    case 'GET':
-        try {
-            const { month } = req.query;
-            console.log('Received request for payments. Month:', month);
-    
-            if (!month || !/^\d{4}-\d{2}$/.test(month)) {
-                throw new Error('Invalid month format. Expected YYYY-MM');
+        case 'GET':
+            try {
+                const { year, month } = req.query;
+                console.log('Received request for payments. Year:', year, 'Month:', month);
+        
+                if (!year || !month || !/^\d{4}$/.test(year) || !/^\d{2}$/.test(month)) {
+                    throw new Error('Invalid year or month format. Expected YYYY for year and MM for month');
+                }
+        
+                const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+                const endDate = new Date(parseInt(year), parseInt(month), 0);
+        
+                console.log('Fetching payments from', startDate.toISOString(), 'to', endDate.toISOString());
+        
+                const { data, error } = await supabase
+                    .from('payments')
+                    .select(`
+                        id,
+                        tenant_id,
+                        room_id,
+                        amount,
+                        payment_date,
+                        payment_method,
+                        payment_for
+                    `)
+                    .gte('payment_for', startDate.toISOString())
+                    .lte('payment_for', endDate.toISOString());
+                
+                if (error) throw error;
+        
+                console.log('Fetched payments:', data);
+        
+                res.status(200).json(data);
+            } catch (error) {
+                console.error('Error in GET /api/payments:', error);
+                res.status(400).json({ success: false, message: error.message });
             }
-    
-            const startDate = `${month}-01`;
-            const endDate = new Date(month.slice(0, 4), parseInt(month.slice(5, 7)), 0).toISOString().split('T')[0];
-    
-            console.log('Fetching payments from', startDate, 'to', endDate);
-    
-            const { data, error } = await supabase
-                .from('payments')
-                .select(`
-                    id,
-                    tenant_id,
-                    room_id,
-                    amount,
-                    payment_date,
-                    payment_method,
-                    payment_for_month
-                `)
-                .gte('payment_for_month', startDate)
-                .lte('payment_for_month', endDate);
-            
-            if (error) throw error;
-    
-            console.log('Fetched payments:', data);
-    
-            res.status(200).json(data);
-        } catch (error) {
-            console.error('Error in GET /api/payments:', error);
-            res.status(400).json({ success: false, message: error.message });
-        }
-        break;
+            break;
 
         case 'POST':
             try {
-                const { tenant_id, room_id, amount, payment_date, payment_method, payment_for_month } = req.body;
+                const { tenant_id, room_id, amount, payment_date, payment_method, payment_for_year, payment_for_month } = req.body;
                 
-                console.log('Received payment data:', req.body); // เพิ่ม log นี้เพื่อตรวจสอบข้อมูลที่ได้รับ
+                console.log('Received payment data:', req.body);
         
-                if (!tenant_id || !room_id || !amount || !payment_date || !payment_method || !payment_for_month) {
+                if (!tenant_id || !room_id || !amount || !payment_date || !payment_method || !payment_for_year || !payment_for_month) {
                     throw new Error('Missing required fields');
                 }
         
+                const payment_for = new Date(payment_for_year, payment_for_month - 1, 1);
+
                 const { data, error } = await supabase
                     .from('payments')
                     .insert({ 
@@ -65,16 +67,16 @@ module.exports = async (req, res) => {
                         amount, 
                         payment_date, 
                         payment_method, 
-                        payment_for_month 
+                        payment_for
                     });
                 
                 if (error) throw error;
                 
-                console.log('Inserted payment data:', data); // เพิ่ม log นี้เพื่อตรวจสอบข้อมูลที่ถูกบันทึก
+                console.log('Inserted payment data:', data);
                 
                 res.status(201).json(data);
             } catch (error) {
-                console.error('Error in POST /api/payments:', error); // เพิ่ม log นี้เพื่อตรวจสอบข้อผิดพลาด
+                console.error('Error in POST /api/payments:', error);
                 res.status(400).json({ success: false, message: error.message });
             }
             break;
@@ -82,11 +84,13 @@ module.exports = async (req, res) => {
         case 'PUT':
             try {
                 const { id } = req.query;
-                const { tenant_id, payment_month, amount, payment_date, payment_method, note } = req.body;
+                const { tenant_id, room_id, amount, payment_date, payment_method, payment_for_year, payment_for_month } = req.body;
                 
+                const payment_for = new Date(payment_for_year, payment_for_month - 1, 1);
+
                 const { data, error } = await supabase
                     .from('payments')
-                    .update({ tenant_id, payment_month, amount, payment_date, payment_method, note })
+                    .update({ tenant_id, room_id, amount, payment_date, payment_method, payment_for })
                     .eq('id', id);
                 
                 if (error) throw error;
