@@ -254,3 +254,49 @@ body {
         height: 180px;
     }
 }
+
+@media (max-width: 767.98px) {
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    #paymentsTable th,
+    #paymentsTable td {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    #paymentsTable .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .alert {
+        font-size: 0.75rem;
+    }
+    
+    .card-title {
+        font-size: 1rem;
+    }
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.status-paid {
+    color: #fff;
+    background-color: #28a745;
+}
+
+.status-unpaid {
+    color: #212529;
+    background-color: #ffc107;
+}
