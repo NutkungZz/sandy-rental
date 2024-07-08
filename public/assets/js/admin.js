@@ -229,16 +229,14 @@ function displayPayments() {
         const payment = payments.find(p => p.room_id === room.id);
         const tenant = tenants.find(t => t.room_id === room.id);
 
-        console.log(`Room ${room.room_number}:`, { payment, tenant });
-
         const row = paymentTable.insertRow();
         row.innerHTML = `
             <td>${room.room_number}</td>
-            <td>${tenant ? tenant.name : 'ว่าง'}</td>
-            <td>${payment ? '<span class="badge bg-success">ชำระแล้ว</span>' : '<span class="badge bg-warning">ยังไม่ชำระ</span>'}</td>
-            <td>${payment ? `${payment.amount} บาท` : '-'}</td>
+            <td>${tenant ? tenant.name : '-'}</td>
+            <td><span class="status-badge ${payment ? 'status-paid' : 'status-unpaid'}">${payment ? 'ชำระแล้ว' : 'ยังไม่ชำระ'}</span></td>
+            <td>${payment ? `${payment.amount.toLocaleString()} บาท` : '-'}</td>
             <td>${payment ? formatDate(payment.payment_date) : '-'}</td>
-            <td>${tenant ? `<button class="btn btn-sm btn-primary" onclick="showPaymentModal(${tenant.id}, ${room.id})">บันทึกการชำระเงิน</button>` : '-'}</td>
+            <td>${tenant ? `<button class="btn btn-sm btn-primary" onclick="showPaymentModal(${tenant.id}, ${room.id})">บันทึก</button>` : '-'}</td>
         `;
 
         if (payment) {
