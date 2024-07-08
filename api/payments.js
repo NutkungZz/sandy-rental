@@ -57,6 +57,11 @@ module.exports = async (req, res) => {
                     throw new Error('Missing required fields');
                 }
         
+                // ตรวจสอบรูปแบบของ payment_for_month
+                if (!/^\d{4}-\d{2}$/.test(payment_for_month)) {
+                    throw new Error('Invalid payment_for_month format. Expected YYYY-MM');
+                }
+        
                 const { data, error } = await supabase
                     .from('payments')
                     .insert({ 
@@ -65,14 +70,14 @@ module.exports = async (req, res) => {
                         amount, 
                         payment_date, 
                         payment_method, 
-                        payment_for_month 
+                        payment_for_month: payment_for_month + '-01' // เพิ่ม '-01' เพื่อให้เป็นรูปแบบวันที่ที่ถูกต้อง
                     });
                 
                 if (error) throw error;
                 
                 console.log('Inserted payment data:', data);
                 
-                res.status(201).json(data);
+                res.status(201).json({ success: true, data });
             } catch (error) {
                 console.error('Error in POST /api/payments:', error);
                 res.status(400).json({ success: false, message: error.message });
