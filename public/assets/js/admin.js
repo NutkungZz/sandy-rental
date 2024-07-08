@@ -118,7 +118,9 @@ function fetchPayments() {
 
     console.log('Selected month-year:', currentMonthYear);
     
-    return fetch(`/api/payments?month=${currentMonthYear}`)
+    const [year, month] = currentMonthYear.split('-');
+    
+    return fetch(`/api/payments?year=${year}&month=${month}`)
         .then(response => {
             if (!response.ok) {
                 return response.json().then(err => {
