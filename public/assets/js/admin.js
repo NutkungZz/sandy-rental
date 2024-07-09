@@ -11,7 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     initializeMonthYearFilter();
-    populatePaymentMonthSelect(); // เพิ่มบรรทัดนี้
+    populatePaymentMonthSelect(); 
+        
+    document.getElementById('addTenantModal').addEventListener('show.bs.modal', function (event) {
+        populateRoomSelect();
+    });
     
     Promise.all([fetchTenants(), fetchRooms()])
         .then(() => {
