@@ -277,7 +277,7 @@ function handleAddTenant(e) {
         name: document.getElementById('addTenantName').value,
         phone: document.getElementById('addTenantPhone').value,
         email: document.getElementById('addTenantEmail').value,
-        room_id: document.getElementById('addRoomId').value,
+        room_id: parseInt(document.getElementById('addRoomId').value),
         move_in_date: document.getElementById('addMoveInDate').value,
     };
 
