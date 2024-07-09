@@ -76,6 +76,7 @@ function fetchRooms() {
             console.log('Fetched rooms:', data);
             rooms = data;
             displayRooms();
+            populateRoomSelect();
         })
         .catch(error => console.error('Error fetching rooms:', error));
 }
