@@ -46,19 +46,12 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('payments-tab').addEventListener('click', function() {
         fetchPayments();
     });
-
-    // Initialize tooltips and popovers if you're using them
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
+    document.getElementById('dashboard-tab').addEventListener('click', function() {
+        fetchDashboardData();
     });
 
-    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-        return new bootstrap.Popover(popoverTriggerEl);
-    });
-
-    console.log('DOM fully loaded and parsed');
+    // Initialize dashboard
+    fetchDashboardData();
 });
 
 function fetchTenants() {
