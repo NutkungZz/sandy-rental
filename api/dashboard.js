@@ -2,38 +2,74 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
+
+// ตรวจสอบว่ามี URL และ Key หรือไม่
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Supabase URL or Key is missing');
+  process.exit(1);
+}
+
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 module.exports = async (req, res) => {
   try {
+    console.log('Fetching dashboard data...');
+
+    // ดึงข้อมูลจำนวนห้องทั้งหมด
+    const { count: totalRooms, error: totalRoomsError } = await supabase
+      .from('rooms')
+      .select('*', { count: 'exact', head: true });
+
+    if (totalRoomsError) throw new Error(`Error fetching total rooms: ${totalRoomsError.message}`);
+
+    // ดึงข้อมูลจำนวนห้องว่าง
+    const { count: vacantRooms, error: vacantRoomsError } = await supabase
+      .from('rooms')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'ว่าง');
+
+    if (vacantRoomsError) throw new Error(`Error fetching vacant rooms: ${vacantRoomsError.message}`);
+
+    // ดึงข้อมูลรายได้เดือนนี้
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const { data: monthlyIncomeData, error: monthlyIncomeError } = await supabase
+      .from('payments')
+      .select('amount')
+      .gte('payment_date', `${currentMonth}-01`)
+      .lte('payment_date', `${currentMonth}-31`);
+
+    if (monthlyIncomeError) throw new Error(`Error fetching monthly income: ${monthlyIncomeError.message}`);
+
+    const monthlyIncome = monthlyIncomeData.reduce((sum, payment) => sum + payment.amount, 0);
+
     // ดึงข้อมูลการชำระเงินรายเดือน
-    const { data: monthlyPayments, error: monthlyError } = await supabase
+    const { data: monthlyPayments, error: monthlyPaymentsError } = await supabase
       .from('payments')
       .select('payment_month, amount')
       .order('payment_month', { ascending: true });
 
-    if (monthlyError) throw monthlyError;
+    if (monthlyPaymentsError) throw new Error(`Error fetching monthly payments: ${monthlyPaymentsError.message}`);
 
     // ดึงข้อมูลสถานะการชำระเงินของเดือนปัจจุบัน
-    const currentMonth = new Date().toISOString().slice(0, 7); // รูปแบบ 'YYYY-MM'
     const { data: statusData, error: statusError } = await supabase
       .from('tenants')
       .select('id, rooms!inner(id, room_number), payments!inner(payment_month, amount)')
       .eq('payments.payment_month', currentMonth);
 
-    if (statusError) throw statusError;
+    if (statusError) throw new Error(`Error fetching payment status: ${statusError.message}`);
 
     // จัดรูปแบบข้อมูลสำหรับส่งกลับ
     const dashboardData = {
-      totalRooms: (await supabase.from('rooms').select('id', { count: 'exact' })).count || 0,
-      vacantRooms: (await supabase.from('rooms').select('id', { count: 'exact' }).eq('status', 'ว่าง')).count || 0,
-      monthlyIncome: (await supabase.from('payments').select('amount').gte('payment_date', new Date().toISOString().slice(0, 7)).sum('amount')).sum || 0,
+      totalRooms,
+      vacantRooms,
+      monthlyIncome,
       unpaidCount: statusData.filter(t => t.payments.length === 0).length,
       monthlyPayments: processMonthlyPayments(monthlyPayments),
       paymentStatus: processPaymentStatus(statusData),
       recentPayments: await getRecentPayments()
     };
 
+    console.log('Dashboard data fetched successfully');
     res.status(200).json(dashboardData);
   } catch (error) {
     console.error('Dashboard error:', error);
@@ -64,6 +100,6 @@ async function getRecentPayments() {
     .order('payment_date', { ascending: false })
     .limit(5);
 
-  if (error) throw error;
+  if (error) throw new Error(`Error fetching recent payments: ${error.message}`);
   return data;
 }
