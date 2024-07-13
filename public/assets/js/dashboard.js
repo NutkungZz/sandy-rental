@@ -4,30 +4,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function fetchDashboardData() {
     fetch('/api/dashboard')
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             updateDashboardUI(data);
         })
         .catch(error => {
             console.error('Error fetching dashboard data:', error);
+            alert('ไม่สามารถโหลดข้อมูลแดชบอร์ดได้ กรุณาลองใหม่อีกครั้ง');
         });
 }
 
 function updateDashboardUI(data) {
-    // อัพเดตข้อมูลทั่วไป
-    document.getElementById('totalRooms').textContent = data.totalRooms;
-    document.getElementById('vacantRooms').textContent = data.vacantRooms;
-    document.getElementById('monthlyIncome').textContent = '฿' + data.monthlyIncome.toLocaleString();
-    document.getElementById('unpaidCount').textContent = data.unpaidCount;
+    document.getElementById('totalRooms').textContent = data.totalRooms || 0;
+    document.getElementById('vacantRooms').textContent = data.vacantRooms || 0;
+    document.getElementById('monthlyIncome').textContent = data.monthlyIncome ? '฿' + data.monthlyIncome.toLocaleString() : '฿0';
+    document.getElementById('unpaidCount').textContent = data.unpaidCount || 0;
 
-    // สร้างกราฟรายได้รายเดือน
-    createIncomeChart(data.monthlyPayments);
-
-    // สร้างกราฟวงกลมแสดงสถานะการชำระเงิน
-    createPaymentStatusChart(data.paymentStatus);
-
-    // อัพเดตตารางการชำระเงินล่าสุด
-    updateRecentPaymentsTable(data.recentPayments);
+    if (data.monthlyPayments) createIncomeChart(data.monthlyPayments);
+    if (data.paymentStatus) createPaymentStatusChart(data.paymentStatus);
+    if (data.recentPayments) updateRecentPaymentsTable(data.recentPayments);
 }
 
 function createIncomeChart(monthlyData) {
