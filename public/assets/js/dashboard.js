@@ -11,7 +11,7 @@ function fetchDashboardData() {
         })
         .catch(error => {
             console.error('Error fetching dashboard data:', error);
-            alert('ไม่สามารถโหลดข้อมูลแดชบอร์ดได้ กรุณาลองใหม่อีกครั้ง');
+            //alert('ไม่สามารถโหลดข้อมูลแดชบอร์ดได้ กรุณาลองใหม่อีกครั้ง');
         });
 }
 
