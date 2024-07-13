@@ -27,18 +27,19 @@ module.exports = async (req, res) => {
         if (paymentsError) throw paymentsError;
 
         // คำนวณรายได้เดือนนี้และจำนวนห้องที่ยังไม่ชำระ
-        const currentMonth = new Date().toISOString().slice(5, 7); // format: 'MM'
-        const currentYear = new Date().getFullYear().toString().slice(-2); // format: 'YY'
-        const currentMonthYear = `${currentMonth}-${currentYear}`; // format: 'MM-YY'
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+        const currentMonthYear = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
 
         console.log('Current month-year:', currentMonthYear);
 
         const monthlyIncome = payments
-            .filter(payment => payment.payment_for_month.endsWith(currentMonthYear))
+            .filter(payment => payment.payment_for_month === currentMonthYear)
             .reduce((sum, payment) => sum + payment.amount, 0);
 
         const paidRoomsThisMonth = new Set(payments
-            .filter(payment => payment.payment_for_month.endsWith(currentMonthYear))
+            .filter(payment => payment.payment_for_month === currentMonthYear)
             .map(payment => payment.room_id));
 
         const unpaidCount = totalRooms - paidRoomsThisMonth.size;
@@ -63,13 +64,15 @@ module.exports = async (req, res) => {
 };
 
 function processMonthlyPayments(payments) {
-    const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
-    const currentYear = new Date().getFullYear().toString().slice(-2);
+    const currentYear = new Date().getFullYear();
+    const months = Array.from({ length: 12 }, (_, i) => {
+        const month = String(i + 1).padStart(2, '0');
+        return `${currentYear}-${month}-01`;
+    });
     
-    return months.map(month => {
-        const monthYear = `${month}-${currentYear}`;
+    return months.map(monthYear => {
         const monthlyTotal = payments
-            .filter(p => p.payment_for_month.endsWith(monthYear))
+            .filter(p => p.payment_for_month === monthYear)
             .reduce((sum, payment) => sum + payment.amount, 0);
         return monthlyTotal;
     });
