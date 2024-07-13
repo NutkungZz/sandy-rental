@@ -296,6 +296,41 @@ body {
     background-color: #28a745;
 }
 
+/* Dashboard Styles */
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+    color: #333;
+    font-weight: bold;
+}
+
+.display-4 {
+    font-weight: bold;
+    color: #007bff;
+}
+
+#incomeChart, #paymentStatusChart {
+    height: 300px;
+}
+
+.table th {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
 .status-unpaid {
     color: #212529;
     background-color: #ffc107;
