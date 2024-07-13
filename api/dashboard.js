@@ -2,104 +2,73 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
-
-// ตรวจสอบว่ามี URL และ Key หรือไม่
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Supabase URL or Key is missing');
-  process.exit(1);
-}
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 module.exports = async (req, res) => {
-  try {
-    console.log('Fetching dashboard data...');
+    const { method } = req;
 
-    // ดึงข้อมูลจำนวนห้องทั้งหมด
-    const { count: totalRooms, error: totalRoomsError } = await supabase
-      .from('rooms')
-      .select('*', { count: 'exact', head: true });
+    switch (method) {
+        case 'GET':
+            try {
+                console.log('Fetching dashboard data...');
 
-    if (totalRoomsError) throw new Error(`Error fetching total rooms: ${totalRoomsError.message}`);
+                // ดึงข้อมูลจำนวนห้องทั้งหมด
+                const { data: rooms, error: roomsError } = await supabase
+                    .from('rooms')
+                    .select('*');
 
-    // ดึงข้อมูลจำนวนห้องว่าง
-    const { count: vacantRooms, error: vacantRoomsError } = await supabase
-      .from('rooms')
-      .select('*', { count: 'exact', head: true })
-      .eq('status', 'ว่าง');
+                if (roomsError) throw roomsError;
 
-    if (vacantRoomsError) throw new Error(`Error fetching vacant rooms: ${vacantRoomsError.message}`);
+                const totalRooms = rooms.length;
+                const vacantRooms = rooms.filter(room => room.status === 'ว่าง').length;
 
-    // ดึงข้อมูลรายได้เดือนนี้
-    const currentMonth = new Date().toISOString().slice(0, 7);
-    const { data: monthlyIncomeData, error: monthlyIncomeError } = await supabase
-      .from('payments')
-      .select('amount')
-      .gte('payment_date', `${currentMonth}-01`)
-      .lte('payment_date', `${currentMonth}-31`);
+                // ดึงข้อมูลการชำระเงิน
+                const { data: payments, error: paymentsError } = await supabase
+                    .from('payments')
+                    .select('*, tenants(name), rooms(room_number)')
+                    .order('payment_date', { ascending: false });
 
-    if (monthlyIncomeError) throw new Error(`Error fetching monthly income: ${monthlyIncomeError.message}`);
+                if (paymentsError) throw paymentsError;
 
-    const monthlyIncome = monthlyIncomeData.reduce((sum, payment) => sum + payment.amount, 0);
+                // คำนวณรายได้เดือนนี้
+                const currentMonth = new Date().toISOString().slice(0, 7);
+                const monthlyIncome = payments
+                    .filter(payment => payment.payment_date.startsWith(currentMonth))
+                    .reduce((sum, payment) => sum + payment.amount, 0);
 
-    // ดึงข้อมูลการชำระเงินรายเดือน
-    const { data: monthlyPayments, error: monthlyPaymentsError } = await supabase
-      .from('payments')
-      .select('payment_month, amount')
-      .order('payment_month', { ascending: true });
+                // จัดรูปแบบข้อมูลสำหรับส่งกลับ
+                const dashboardData = {
+                    totalRooms,
+                    vacantRooms,
+                    monthlyIncome,
+                    unpaidCount: rooms.length - payments.filter(p => p.payment_date.startsWith(currentMonth)).length,
+                    monthlyPayments: processMonthlyPayments(payments),
+                    paymentStatus: [payments.length, rooms.length - payments.length],
+                    recentPayments: payments.slice(0, 5)
+                };
 
-    if (monthlyPaymentsError) throw new Error(`Error fetching monthly payments: ${monthlyPaymentsError.message}`);
+                console.log('Dashboard data fetched successfully');
+                res.status(200).json(dashboardData);
+            } catch (error) {
+                console.error('Dashboard error:', error);
+                res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการดึงข้อมูล Dashboard', error: error.message });
+            }
+            break;
 
-    // ดึงข้อมูลสถานะการชำระเงินของเดือนปัจจุบัน
-    const { data: statusData, error: statusError } = await supabase
-      .from('tenants')
-      .select('id, rooms!inner(id, room_number), payments!inner(payment_month, amount)')
-      .eq('payments.payment_month', currentMonth);
-
-    if (statusError) throw new Error(`Error fetching payment status: ${statusError.message}`);
-
-    // จัดรูปแบบข้อมูลสำหรับส่งกลับ
-    const dashboardData = {
-      totalRooms,
-      vacantRooms,
-      monthlyIncome,
-      unpaidCount: statusData.filter(t => t.payments.length === 0).length,
-      monthlyPayments: processMonthlyPayments(monthlyPayments),
-      paymentStatus: processPaymentStatus(statusData),
-      recentPayments: await getRecentPayments()
-    };
-
-    console.log('Dashboard data fetched successfully');
-    res.status(200).json(dashboardData);
-  } catch (error) {
-    console.error('Dashboard error:', error);
-    res.status(500).json({ success: false, message: 'เกิดข้อผิดพลาดในการดึงข้อมูล Dashboard', error: error.message });
-  }
+        default:
+            res.setHeader('Allow', ['GET']);
+            res.status(405).end(`Method ${method} Not Allowed`);
+    }
 };
 
-function processMonthlyPayments(data) {
-  const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
-  const currentYear = new Date().getFullYear().toString();
-  
-  return months.map(month => {
-    const matchingPayment = data.find(p => p.payment_month === `${currentYear}-${month}`);
-    return matchingPayment ? matchingPayment.amount : 0;
-  });
-}
-
-function processPaymentStatus(data) {
-  const paidCount = data.filter(t => t.payments.length > 0).length;
-  const unpaidCount = data.length - paidCount;
-  return [paidCount, unpaidCount];
-}
-
-async function getRecentPayments() {
-  const { data, error } = await supabase
-    .from('payments')
-    .select('*, tenants(name), rooms(room_number)')
-    .order('payment_date', { ascending: false })
-    .limit(5);
-
-  if (error) throw new Error(`Error fetching recent payments: ${error.message}`);
-  return data;
+function processMonthlyPayments(payments) {
+    const months = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12'];
+    const currentYear = new Date().getFullYear().toString();
+    
+    return months.map(month => {
+        const monthlyTotal = payments
+            .filter(p => p.payment_date.startsWith(`${currentYear}-${month}`))
+            .reduce((sum, payment) => sum + payment.amount, 0);
+        return monthlyTotal;
+    });
 }
