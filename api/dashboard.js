@@ -2,13 +2,6 @@ const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
-
-// ตรวจสอบว่ามี URL และ Key หรือไม่
-if (!supabaseUrl || !supabaseKey) {
-  console.error('Supabase URL or Key is missing');
-  process.exit(1);
-}
-
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 module.exports = async (req, res) => {
