@@ -1,7 +1,3 @@
-document.addEventListener('DOMContentLoaded', function() {
-    fetchDashboardData();
-});
-
 function fetchDashboardData() {
     fetch('/api/dashboard')
         .then(response => {
