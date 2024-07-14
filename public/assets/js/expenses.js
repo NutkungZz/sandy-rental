@@ -218,7 +218,12 @@ function displayExpenseSummary(summary) {
 }
 
 function createMonthlyExpenseChart(monthlyData) {
-    const ctx = document.getElementById('monthlyExpenseChart').getContext('2d');
+    const canvas = document.getElementById('monthlyExpenseChart');
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+    const ctx = canvas.getContext('2d');
     
     if (monthlyExpenseChart) {
         monthlyExpenseChart.destroy();
@@ -243,7 +248,7 @@ function createMonthlyExpenseChart(monthlyData) {
                     title: {
                         display: true,
                         text: 'จำนวนเงิน (บาท)'
-                        }
+                    }
                 }
             }
         }
@@ -251,7 +256,12 @@ function createMonthlyExpenseChart(monthlyData) {
 }
 
 function createExpenseTypeChart(typeData) {
-    const ctx = document.getElementById('expenseTypeChart').getContext('2d');
+    const canvas = document.getElementById('expenseTypeChart');
+    if (!canvas) {
+        console.error('Canvas element not found');
+        return;
+    }
+    const ctx = canvas.getContext('2d');
     
     if (expenseTypeChart) {
         expenseTypeChart.destroy();
