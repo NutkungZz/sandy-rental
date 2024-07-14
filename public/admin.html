@@ -176,8 +176,15 @@
                 <h3>จัดการค่าใช้จ่าย</h3>
                 <button class="btn btn-primary mb-3" id="addExpenseBtn">เพิ่มค่าใช้จ่าย</button>
                 <div id="expensesSummary"></div>
-                <div id="expensesChart"></div>
-                <table class="table" id="expensesTable">
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <canvas id="monthlyExpenseChart"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <canvas id="expenseTypeChart"></canvas>
+                    </div>
+                </div>
+                <table class="table mt-3" id="expensesTable">
                     <thead>
                         <tr>
                             <th>วันที่</th>
