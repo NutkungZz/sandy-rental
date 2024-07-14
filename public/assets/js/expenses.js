@@ -49,7 +49,7 @@ function addExpense(expenseData) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('เพิ่มค่าใช้จ่ายสำเร็จ');
+            //alert('เพิ่มค่าใช้จ่ายสำเร็จ');
             loadExpenses();
             bootstrap.Modal.getInstance(document.getElementById('expenseModal')).hide();
         } else {
@@ -88,6 +88,7 @@ function loadExpenses() {
     fetch('/api/expenses')
     .then(response => response.json())
     .then(data => {
+        console.log('Expenses data:', data); // เพิ่มบรรทัดนี้
         displayExpenses(data);
     })
     .catch(error => {
@@ -106,8 +107,8 @@ function displayExpenses(expenses) {
             <td>${formatDate(expense.date)}</td>
             <td>${expense.type}</td>
             <td>฿${expense.amount.toLocaleString()}</td>
-            <td>${expense.details}</td>
-            <td>${expense.room_id ? expense.room.room_number : '-'}</td>
+            <td>${expense.details || '-'}</td>
+            <td>${expense.rooms ? expense.rooms.room_number : '-'}</td>
             <td>
                 <button class="btn btn-sm btn-primary" onclick="editExpense(${expense.id})">แก้ไข</button>
                 <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id})">ลบ</button>
