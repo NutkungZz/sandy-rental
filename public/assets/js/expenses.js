@@ -125,8 +125,15 @@ function displayExpenses(expenses) {
 function editExpense(id) {
     fetch(`/api/expenses/${id}`)
     .then(response => response.json())
-    .then(expense => {
-        console.log('Expense data for editing:', expense); // เพิ่ม log เพื่อดูข้อมูลที่ได้รับ
+    .then(data => {
+        console.log('Expense data for editing:', data);
+        // ตรวจสอบว่า data เป็น Array หรือไม่
+        const expense = Array.isArray(data) ? data[0] : data;
+        
+        if (!expense) {
+            throw new Error('ไม่พบข้อมูลค่าใช้จ่าย');
+        }
+
         document.getElementById('expenseId').value = expense.id;
         document.getElementById('expenseDate').value = expense.date.split('T')[0]; // แปลงวันที่ให้อยู่ในรูปแบบที่ input type="date" ต้องการ
         document.getElementById('expenseType').value = expense.type;
@@ -138,7 +145,7 @@ function editExpense(id) {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลค่าใช้จ่าย');
+        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลค่าใช้จ่าย: ' + error.message);
     });
 }
 
