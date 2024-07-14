@@ -1,3 +1,10 @@
+let incomeChart = null;
+let paymentStatusChart = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetchDashboardData();
+});
+
 function fetchDashboardData() {
     fetch('/api/dashboard')
         .then(response => {
@@ -11,7 +18,7 @@ function fetchDashboardData() {
         })
         .catch(error => {
             console.error('Error fetching dashboard data:', error);
-            //alert('ไม่สามารถโหลดข้อมูลแดชบอร์ดได้ กรุณาลองใหม่อีกครั้ง');
+            alert('ไม่สามารถโหลดข้อมูลแดชบอร์ดได้ กรุณาลองใหม่อีกครั้ง');
         });
 }
 
@@ -28,7 +35,12 @@ function updateDashboardUI(data) {
 
 function createIncomeChart(monthlyData) {
     const ctx = document.getElementById('incomeChart').getContext('2d');
-    new Chart(ctx, {
+    
+    if (incomeChart) {
+        incomeChart.destroy();
+    }
+
+    incomeChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'],
@@ -52,7 +64,12 @@ function createIncomeChart(monthlyData) {
 
 function createPaymentStatusChart(statusData) {
     const ctx = document.getElementById('paymentStatusChart').getContext('2d');
-    new Chart(ctx, {
+    
+    if (paymentStatusChart) {
+        paymentStatusChart.destroy();
+    }
+
+    paymentStatusChart = new Chart(ctx, {
         type: 'pie',
         data: {
             labels: ['ชำระแล้ว', 'ยังไม่ชำระ'],
