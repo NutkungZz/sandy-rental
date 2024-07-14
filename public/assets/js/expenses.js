@@ -80,7 +80,7 @@ function updateExpense(id, expenseData) {
             loadExpenses();
             bootstrap.Modal.getInstance(document.getElementById('expenseModal')).hide();
         } else {
-            alert('เกิดข้อผิดพลาด: ' + data.message);
+            alert('เกิดข้อผิดพลาด: ' + (data.message || 'ไม่สามารถแก้ไขค่าใช้จ่ายได้'));
         }
     })
     .catch(error => {
@@ -93,12 +93,14 @@ function loadExpenses() {
     fetch('/api/expenses')
     .then(response => response.json())
     .then(data => {
-        console.log('Expenses data:', data); // เพิ่มบรรทัดนี้
-        displayExpenses(data);
+        console.log('Expenses data:', data);
+        // ตรวจสอบว่า data เป็น Array หรือไม่
+        const expenses = Array.isArray(data) ? data : [data];
+        displayExpenses(expenses);
     })
     .catch(error => {
         console.error('Error:', error);
-        //alert('เกิดข้อผิดพลาดในการโหลดข้อมูลค่าใช้จ่าย');
+        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลค่าใช้จ่าย');
     });
 }
 
