@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
             .filter(payment => payment.payment_for_month === currentMonthYear)
             .map(payment => payment.room_id));
 
-        const unpaidCount = totalRooms - paidRoomsThisMonth.size;
+        const unpaidCount = totalRooms - paidRoomsThisMonth.size - vacantRooms;
 
         // จัดรูปแบบข้อมูลสำหรับส่งกลับ
         const dashboardData = {
