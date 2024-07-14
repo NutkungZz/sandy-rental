@@ -12,7 +12,12 @@ module.exports = async (req, res) => {
             try {
                 const { data, error } = await supabase
                     .from('expenses')
-                    .select('*, rooms(room_number)')
+                    .select(`
+                        *,
+                        rooms (
+                            room_number
+                        )
+                    `)
                     .order('date', { ascending: false });
 
                 if (error) throw error;
