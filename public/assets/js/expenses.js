@@ -1,24 +1,17 @@
+let monthlyExpenseChart = null;
+let expenseTypeChart = null;
+
 document.addEventListener('DOMContentLoaded', function() {
-    // เพิ่ม event listener สำหรับปุ่มเพิ่มค่าใช้จ่าย
     document.getElementById('addExpenseBtn').addEventListener('click', showExpenseModal);
-
-    // เพิ่ม event listener สำหรับฟอร์มค่าใช้จ่าย
     document.getElementById('expenseForm').addEventListener('submit', handleExpenseSubmit);
-
-    // โหลดข้อมูลค่าใช้จ่ายเมื่อคลิกที่แท็บค่าใช้จ่าย
     document.getElementById('expenses-tab').addEventListener('click', loadExpenses);
-
-    // เติมข้อมูลห้องในฟอร์มค่าใช้จ่าย
-    populateRoomSelect();
-
-    // เพิ่ม event listener สำหรับ Modal
     document.getElementById('expenseModal').addEventListener('show.bs.modal', function () {
         populateRoomSelect();
     });
+    populateRoomSelect();
 });
 
 function showExpenseModal() {
-    // แสดง modal เพิ่มค่าใช้จ่าย
     document.getElementById('expenseId').value = '';
     document.getElementById('expenseForm').reset();
     document.getElementById('expenseModalTitle').textContent = 'เพิ่มค่าใช้จ่าย';
@@ -37,10 +30,8 @@ function handleExpenseSubmit(e) {
 
     const expenseId = document.getElementById('expenseId').value;
     if (expenseId) {
-        // แก้ไขค่าใช้จ่าย
         updateExpense(expenseId, expenseData);
     } else {
-        // เพิ่มค่าใช้จ่ายใหม่
         addExpense(expenseData);
     }
 }
@@ -54,7 +45,7 @@ function addExpense(expenseData) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            //alert('เพิ่มค่าใช้จ่ายสำเร็จ');
+            alert('เพิ่มค่าใช้จ่ายสำเร็จ');
             loadExpenses();
             bootstrap.Modal.getInstance(document.getElementById('expenseModal')).hide();
         } else {
@@ -94,9 +85,10 @@ function loadExpenses() {
     .then(response => response.json())
     .then(data => {
         console.log('Expenses data:', data);
-        // ตรวจสอบว่า data เป็น Array หรือไม่
         const expenses = Array.isArray(data) ? data : [data];
         displayExpenses(expenses);
+        const summary = summarizeExpenses(expenses);
+        displayExpenseSummary(summary);
     })
     .catch(error => {
         console.error('Error:', error);
@@ -129,7 +121,6 @@ function editExpense(id) {
     .then(response => response.json())
     .then(data => {
         console.log('Expense data for editing:', data);
-        // ตรวจสอบว่า data เป็น Array หรือไม่
         const expense = Array.isArray(data) ? data[0] : data;
         
         if (!expense) {
@@ -137,7 +128,7 @@ function editExpense(id) {
         }
 
         document.getElementById('expenseId').value = expense.id;
-        document.getElementById('expenseDate').value = expense.date.split('T')[0]; // แปลงวันที่ให้อยู่ในรูปแบบที่ input type="date" ต้องการ
+        document.getElementById('expenseDate').value = expense.date.split('T')[0];
         document.getElementById('expenseType').value = expense.type;
         document.getElementById('expenseAmount').value = expense.amount;
         document.getElementById('expenseDetails').value = expense.details || '';
@@ -186,6 +177,109 @@ function populateRoomSelect() {
     .catch(error => {
         console.error('Error:', error);
         alert('เกิดข้อผิดพลาดในการโหลดข้อมูลห้อง');
+    });
+}
+
+function summarizeExpenses(expenses) {
+    const summary = {
+        totalAmount: 0,
+        byMonth: {},
+        byType: {}
+    };
+
+    expenses.forEach(expense => {
+        const amount = parseFloat(expense.amount);
+        summary.totalAmount += amount;
+
+        const month = expense.date.substring(0, 7);
+        if (!summary.byMonth[month]) {
+            summary.byMonth[month] = 0;
+        }
+        summary.byMonth[month] += amount;
+
+        if (!summary.byType[expense.type]) {
+            summary.byType[expense.type] = 0;
+        }
+        summary.byType[expense.type] += amount;
+    });
+
+    return summary;
+}
+
+function displayExpenseSummary(summary) {
+    const summaryElement = document.getElementById('expensesSummary');
+    summaryElement.innerHTML = `
+        <h4>สรุปค่าใช้จ่าย</h4>
+        <p>ยอดรวมทั้งหมด: ฿${summary.totalAmount.toLocaleString()}</p>
+    `;
+
+    createMonthlyExpenseChart(summary.byMonth);
+    createExpenseTypeChart(summary.byType);
+}
+
+function createMonthlyExpenseChart(monthlyData) {
+    const ctx = document.getElementById('monthlyExpenseChart').getContext('2d');
+    
+    if (monthlyExpenseChart) {
+        monthlyExpenseChart.destroy();
+    }
+
+    monthlyExpenseChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(monthlyData),
+            datasets: [{
+                label: 'ค่าใช้จ่ายรายเดือน',
+                data: Object.values(monthlyData),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'จำนวนเงิน (บาท)'
+                        }
+                }
+            }
+        }
+    });
+}
+
+function createExpenseTypeChart(typeData) {
+    const ctx = document.getElementById('expenseTypeChart').getContext('2d');
+    
+    if (expenseTypeChart) {
+        expenseTypeChart.destroy();
+    }
+
+    expenseTypeChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(typeData),
+            datasets: [{
+                data: Object.values(typeData),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                }
+            }
+        }
     });
 }
 
