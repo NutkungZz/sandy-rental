@@ -92,7 +92,7 @@ function loadExpenses() {
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลค่าใช้จ่าย');
+        //alert('เกิดข้อผิดพลาดในการโหลดข้อมูลค่าใช้จ่าย');
     });
 }
 
