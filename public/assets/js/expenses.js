@@ -74,3 +74,106 @@ function updateExpense(id, expenseData) {
             alert('แก้ไขค่าใช้จ่ายสำเร็จ');
             loadExpenses();
             bootstrap.Modal.getInstance(document.getElementById('expenseModal')).hide();
+        } else {
+            alert('เกิดข้อผิดพลาด: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการแก้ไขค่าใช้จ่าย');
+    });
+}
+
+function loadExpenses() {
+    fetch('/api/expenses')
+    .then(response => response.json())
+    .then(data => {
+        displayExpenses(data);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลค่าใช้จ่าย');
+    });
+}
+
+function displayExpenses(expenses) {
+    const tableBody = document.getElementById('expensesTable').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = '';
+
+    expenses.forEach(expense => {
+        const row = tableBody.insertRow();
+        row.innerHTML = `
+            <td>${formatDate(expense.date)}</td>
+            <td>${expense.type}</td>
+            <td>฿${expense.amount.toLocaleString()}</td>
+            <td>${expense.details}</td>
+            <td>${expense.room_id ? expense.room.room_number : '-'}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editExpense(${expense.id})">แก้ไข</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteExpense(${expense.id})">ลบ</button>
+            </td>
+        `;
+    });
+}
+
+function editExpense(id) {
+    fetch(`/api/expenses/${id}`)
+    .then(response => response.json())
+    .then(expense => {
+        document.getElementById('expenseId').value = expense.id;
+        document.getElementById('expenseDate').value = expense.date;
+        document.getElementById('expenseType').value = expense.type;
+        document.getElementById('expenseAmount').value = expense.amount;
+        document.getElementById('expenseDetails').value = expense.details;
+        document.getElementById('expenseRoom').value = expense.room_id || '';
+        document.getElementById('expenseModalTitle').textContent = 'แก้ไขค่าใช้จ่าย';
+        new bootstrap.Modal(document.getElementById('expenseModal')).show();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลค่าใช้จ่าย');
+    });
+}
+
+function deleteExpense(id) {
+    if (confirm('คุณแน่ใจหรือไม่ที่จะลบค่าใช้จ่ายนี้?')) {
+        fetch(`/api/expenses/${id}`, { method: 'DELETE' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('ลบค่าใช้จ่ายสำเร็จ');
+                loadExpenses();
+            } else {
+                alert('เกิดข้อผิดพลาด: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาดในการลบค่าใช้จ่าย');
+        });
+    }
+}
+
+function populateRoomSelect() {
+    fetch('/api/rooms')
+    .then(response => response.json())
+    .then(rooms => {
+        const select = document.getElementById('expenseRoom');
+        select.innerHTML = '<option value="">เลือกห้อง</option>';
+        rooms.forEach(room => {
+            const option = document.createElement('option');
+            option.value = room.id;
+            option.textContent = room.room_number;
+            select.appendChild(option);
+        });
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลห้อง');
+    });
+}
+
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('th-TH', options);
+}
