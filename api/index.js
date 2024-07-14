@@ -21,6 +21,11 @@ module.exports = (req, res) => {
         req.query = { id: pathname.split('/')[3] };
       }
       require('./payments')(req, res);
+    } else if (pathname.startsWith('/api/expenses')) {
+      if (method === 'PUT' || method === 'DELETE') {
+        req.query = { id: pathname.split('/')[3] };
+    }
+      require('./expenses')(req, res);
     } else if (pathname === '/api/login') {
       require('./login')(req, res);
     } else if (pathname === '/api/register') {
