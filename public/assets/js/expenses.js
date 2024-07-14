@@ -10,6 +10,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // เติมข้อมูลห้องในฟอร์มค่าใช้จ่าย
     populateRoomSelect();
+
+    // เพิ่ม event listener สำหรับ Modal
+    document.getElementById('expenseModal').addEventListener('show.bs.modal', function () {
+        populateRoomSelect();
+    });
 });
 
 function showExpenseModal() {
@@ -121,11 +126,12 @@ function editExpense(id) {
     fetch(`/api/expenses/${id}`)
     .then(response => response.json())
     .then(expense => {
+        console.log('Expense data for editing:', expense); // เพิ่ม log เพื่อดูข้อมูลที่ได้รับ
         document.getElementById('expenseId').value = expense.id;
-        document.getElementById('expenseDate').value = expense.date;
+        document.getElementById('expenseDate').value = expense.date.split('T')[0]; // แปลงวันที่ให้อยู่ในรูปแบบที่ input type="date" ต้องการ
         document.getElementById('expenseType').value = expense.type;
         document.getElementById('expenseAmount').value = expense.amount;
-        document.getElementById('expenseDetails').value = expense.details;
+        document.getElementById('expenseDetails').value = expense.details || '';
         document.getElementById('expenseRoom').value = expense.room_id || '';
         document.getElementById('expenseModalTitle').textContent = 'แก้ไขค่าใช้จ่าย';
         new bootstrap.Modal(document.getElementById('expenseModal')).show();
