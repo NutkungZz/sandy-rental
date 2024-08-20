@@ -77,43 +77,59 @@ module.exports = async (req, res) => {
             }
             break;
 
-        case 'DELETE':
-            try {
-                const { id } = req.query;
-                
-                // Get the room_id before deleting the tenant
-                const { data: tenantData, error: tenantError } = await supabase
-                    .from('tenants')
-                    .select('room_id')
-                    .eq('id', id)
-                    .single();
+case 'DELETE':
+    try {
+        const { id } = req.query;
+        console.log('Attempting to delete tenant with ID:', id);
+        
+        // Get the room_id before deleting the tenant
+        const { data: tenantData, error: tenantError } = await supabase
+            .from('tenants')
+            .select('room_id')
+            .eq('id', id)
+            .single();
 
-                if (tenantError) throw tenantError;
+        if (tenantError) {
+            console.error('Error fetching tenant data:', tenantError);
+            throw tenantError;
+        }
 
-                // Delete the tenant
-                const { data, error } = await supabase
-                    .from('tenants')
-                    .delete()
-                    .eq('id', id);
-                
-                if (error) throw error;
+        console.log('Tenant data before deletion:', tenantData);
 
-                // Update room status to 'ว่าง'
-                if (tenantData && tenantData.room_id) {
-                    const { error: roomError } = await supabase
-                        .from('rooms')
-                        .update({ status: 'ว่าง' })
-                        .eq('id', tenantData.room_id);
-                    
-                    if (roomError) throw roomError;
-                }
+        // Delete the tenant
+        const { data, error } = await supabase
+            .from('tenants')
+            .delete()
+            .eq('id', id);
+        
+        if (error) {
+            console.error('Error deleting tenant:', error);
+            throw error;
+        }
 
-                res.status(200).json({ success: true, message: 'ลบข้อมูลผู้เช่าและอัปเดตสถานะห้องเรียบร้อยแล้ว' });
-            } catch (error) {
-                console.error('Error deleting tenant:', error);
-                res.status(400).json({ success: false, message: error.message });
+        console.log('Tenant deleted successfully');
+
+        // Update room status to 'ว่าง'
+        if (tenantData && tenantData.room_id) {
+            console.log('Updating room status for room ID:', tenantData.room_id);
+            const { error: roomError } = await supabase
+                .from('rooms')
+                .update({ status: 'ว่าง' })
+                .eq('id', tenantData.room_id);
+            
+            if (roomError) {
+                console.error('Error updating room status:', roomError);
+                throw roomError;
             }
-            break;
+            console.log('Room status updated successfully');
+        }
+
+        res.status(200).json({ success: true, message: 'ลบข้อมูลผู้เช่าและอัปเดตสถานะห้องเรียบร้อยแล้ว' });
+    } catch (error) {
+        console.error('Error in DELETE /api/tenants:', error);
+        res.status(400).json({ success: false, message: error.message });
+    }
+    break;
 
         default:
             res.setHeader('Allow', ['GET', 'POST', 'PUT', 'DELETE']);
