@@ -80,49 +80,33 @@ module.exports = async (req, res) => {
 case 'DELETE':
     try {
         const { id } = req.query;
-        console.log('Attempting to delete tenant with ID:', id);
+        console.log('Attempting to soft delete tenant with ID:', id);
         
-        // Get the room_id before deleting the tenant
-        const { data: tenantData, error: tenantError } = await supabase
-            .from('tenants')
-            .select('room_id')
-            .eq('id', id)
-            .single();
-
-        if (tenantError) {
-            console.error('Error fetching tenant data:', tenantError);
-            throw tenantError;
-        }
-
-        console.log('Tenant data before deletion:', tenantData);
-
-        // Delete the tenant
+        // Soft delete the tenant
         const { data, error } = await supabase
             .from('tenants')
-            .delete()
+            .update({ is_deleted: true })
             .eq('id', id);
         
         if (error) {
-            console.error('Error deleting tenant:', error);
+            console.error('Error soft deleting tenant:', error);
             throw error;
         }
 
-        console.log('Tenant deleted successfully');
+        console.log('Tenant soft deleted successfully');
 
         // Update room status to 'ว่าง'
-        if (tenantData && tenantData.room_id) {
-            console.log('Updating room status for room ID:', tenantData.room_id);
-            const { error: roomError } = await supabase
-                .from('rooms')
-                .update({ status: 'ว่าง' })
-                .eq('id', tenantData.room_id);
-            
-            if (roomError) {
-                console.error('Error updating room status:', roomError);
-                throw roomError;
-            }
-            console.log('Room status updated successfully');
+        const { data: roomData, error: roomError } = await supabase
+            .from('rooms')
+            .update({ status: 'ว่าง' })
+            .eq('id', data[0].room_id);
+        
+        if (roomError) {
+            console.error('Error updating room status:', roomError);
+            throw roomError;
         }
+
+        console.log('Room status updated successfully');
 
         res.status(200).json({ success: true, message: 'ลบข้อมูลผู้เช่าและอัปเดตสถานะห้องเรียบร้อยแล้ว' });
     } catch (error) {
