@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     populatePaymentMonthSelect(); 
         
     document.getElementById('addTenantModal').addEventListener('show.bs.modal', function (event) {
+        console.log('Add tenant modal is opening');
         populateRoomSelect();
     });
     
