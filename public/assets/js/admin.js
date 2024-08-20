@@ -549,7 +549,7 @@ function populateRoomSelect() {
     const roomSelect = document.getElementById('addRoomId');
     roomSelect.innerHTML = '<option value="">เลือกห้อง</option>';
     rooms.forEach(room => {
-        if (!tenants.some(tenant => tenant.room_id === room.id)) {
+        if (room.status === 'ว่าง') {
             const option = document.createElement('option');
             option.value = room.id;
             option.textContent = `ห้อง ${room.room_number}`;
