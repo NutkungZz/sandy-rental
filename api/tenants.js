@@ -33,10 +33,12 @@ module.exports = async (req, res) => {
                 if (error) throw error;
 
                 // Update room status
-                await supabase
+                const { error: roomError } = await supabase
                     .from('rooms')
                     .update({ status: 'มีผู้เช่า' })
                     .eq('id', room_id);
+
+                if (roomError) throw roomError;
 
                 res.status(201).json(data);
             } catch (error) {
@@ -88,6 +90,7 @@ module.exports = async (req, res) => {
 
                 if (tenantError) throw tenantError;
 
+                // Delete the tenant
                 const { data, error } = await supabase
                     .from('tenants')
                     .delete()
@@ -95,16 +98,19 @@ module.exports = async (req, res) => {
                 
                 if (error) throw error;
 
-                // Update room status to ว่าง
+                // Update room status to 'ว่าง'
                 if (tenantData && tenantData.room_id) {
-                    await supabase
+                    const { error: roomError } = await supabase
                         .from('rooms')
                         .update({ status: 'ว่าง' })
                         .eq('id', tenantData.room_id);
+                    
+                    if (roomError) throw roomError;
                 }
 
-                res.status(200).json({ success: true });
+                res.status(200).json({ success: true, message: 'ลบข้อมูลผู้เช่าและอัปเดตสถานะห้องเรียบร้อยแล้ว' });
             } catch (error) {
+                console.error('Error deleting tenant:', error);
                 res.status(400).json({ success: false, message: error.message });
             }
             break;
