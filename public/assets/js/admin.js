@@ -346,15 +346,25 @@ function editTenant(id) {
 function deleteTenant(id) {
     if (confirm('คุณแน่ใจหรือไม่ที่จะลบผู้เช่านี้?')) {
         fetch(`/api/tenants/${id}`, { method: 'DELETE' })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                fetchTenants();
-                fetchRooms();
-                showAlert('ลบข้อมูลสำเร็จ', 'ข้อมูลผู้เช่าได้ถูกลบเรียบร้อยแล้ว', 'success');
+                console.log('Delete response:', data);
+                if (data.success) {
+                    fetchTenants();
+                    fetchRooms();
+                    showAlert('ลบข้อมูลสำเร็จ', 'ข้อมูลผู้เช่าได้ถูกลบเรียบร้อยแล้ว', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to delete tenant');
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showAlert('เกิดข้อผิดพลาด', 'ไม่สามารถลบข้อมูลผู้เช่าได้ กรุณาลองใหม่อีกครั้ง', 'error');
+                showAlert('เกิดข้อผิดพลาด', `ไม่สามารถลบข้อมูลผู้เช่าได้: ${error.message}`, 'error');
             });
     }
 }
