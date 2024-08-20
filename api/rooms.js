@@ -8,18 +8,24 @@ module.exports = async (req, res) => {
     const { method } = req;
 
     switch (method) {
-        case 'GET':
-            try {
-                const { data, error } = await supabase
-                    .from('rooms')
-                    .select('*');
-                
-                if (error) throw error;
-                res.status(200).json(data);
-            } catch (error) {
-                res.status(400).json({ success: false, message: error.message });
-            }
-            break;
+case 'GET':
+    try {
+        console.log('Fetching rooms from database...');
+        const { data, error } = await supabase
+            .from('rooms')
+            .select('*');
+        
+        if (error) throw error;
+        
+        console.log(`Successfully fetched ${data.length} rooms`);
+        console.log('Rooms data:', data);
+        
+        res.status(200).json(data);
+    } catch (error) {
+        console.error('Error fetching rooms:', error);
+        res.status(400).json({ success: false, message: error.message });
+    }
+    break;
 
         case 'POST':
             try {
