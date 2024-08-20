@@ -348,12 +348,7 @@ function deleteTenant(id) {
         fetch(`/api/tenants/${id}`, { method: 'DELETE' })
             .then(response => {
                 console.log('Delete response status:', response.status);
-                return response.text().then(text => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}, message: ${text}`);
-                    }
-                    return text ? JSON.parse(text) : {};
-                });
+                return response.json();
             })
             .then(data => {
                 console.log('Delete response data:', data);
