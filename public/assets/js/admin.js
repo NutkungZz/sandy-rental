@@ -546,18 +546,23 @@ function handleAddPayment(e) {
 }
 
 function populateRoomSelect() {
+    console.log('Populating room select...');
     const roomSelect = document.getElementById('addRoomId');
     roomSelect.innerHTML = '<option value="">เลือกห้อง</option>';
+    
+    // สร้างเซ็ตของห้องที่มีผู้เช่าแล้ว
+    const occupiedRoomIds = new Set(tenants.map(tenant => tenant.room_id));
+    
     rooms.forEach(room => {
-        // ตรวจสอบว่าห้องนี้มีผู้เช่าหรือไม่
-        const hasTenant = tenants.some(tenant => tenant.room_id === room.id);
-        if (!hasTenant) {
+        if (!occupiedRoomIds.has(room.id)) {
             const option = document.createElement('option');
             option.value = room.id;
             option.textContent = `ห้อง ${room.room_number}`;
             roomSelect.appendChild(option);
         }
     });
+    
+    console.log(`Populated ${roomSelect.options.length - 1} available rooms`);
 }
 
 function showAlert(title, message, icon) {
