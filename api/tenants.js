@@ -10,14 +10,28 @@ module.exports = async (req, res) => {
     switch (method) {
         case 'GET':
             try {
+                console.log('Fetching tenants...');
                 const { data, error } = await supabase
                     .from('tenants')
-                    .select('*, rooms(room_number)')
+                    .select(`
+                        *,
+                        rooms (
+                            id,
+                            room_number
+                        )
+                    `)
+                    .eq('is_deleted', false)  // เพิ่มเงื่อนไขนี้เพื่อไม่ดึงข้อมูลที่ถูก soft delete
                     .order('created_at', { ascending: false });
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Error fetching tenants:', error);
+                    throw error;
+                }
+
+                console.log(`Successfully fetched ${data.length} tenants`);
                 res.status(200).json(data);
             } catch (error) {
+                console.error('Error in GET /api/tenants:', error);
                 res.status(400).json({ success: false, message: error.message });
             }
             break;
