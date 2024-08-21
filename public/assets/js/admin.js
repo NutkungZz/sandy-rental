@@ -601,8 +601,13 @@ function populateAvailableRooms() {
         .then(allRooms => {
             console.log('All rooms:', allRooms);
             
-            // กรองเฉพาะห้องที่ว่าง
-            const availableRooms = allRooms.filter(room => !room.tenant_id);
+            // กรองเฉพาะห้องที่ไม่มีผู้เช่า
+            const availableRooms = allRooms.filter(room => {
+                // ตรวจสอบว่าไม่มีผู้เช่าที่กำลังอยู่ในห้องนี้
+                return !tenants.some(tenant => 
+                    tenant.room_id === room.id && tenant.move_out_date === null
+                );
+            });
             console.log('Available rooms:', availableRooms);
 
             availableRooms.forEach(room => {
@@ -615,7 +620,6 @@ function populateAvailableRooms() {
         })
         .catch(error => console.error('Error fetching rooms:', error));
 }
-
 function showAlert(title, message, icon) {
     Swal.fire({
         title: title,
