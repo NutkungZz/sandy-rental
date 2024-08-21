@@ -65,7 +65,7 @@ function fetchRooms() {
     return fetch('/api/rooms')
         .then(response => response.json())
         .then(data => {
-            console.log('All rooms data:', JSON.stringify(data, null, 2));
+            //console.log('All rooms data:', JSON.stringify(data, null, 2));
             rooms = data;
             displayRooms();
             return rooms;
@@ -77,7 +77,7 @@ function fetchTenants() {
     return fetch('/api/tenants')
         .then(response => response.json())
         .then(data => {
-            console.log('All tenants data:', JSON.stringify(data, null, 2));
+            //console.log('All tenants data:', JSON.stringify(data, null, 2));
             tenants = data;
             displayTenants();
             return tenants;
