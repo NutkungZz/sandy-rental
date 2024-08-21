@@ -18,8 +18,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
 const addTenantModal = document.getElementById('addTenantModal');
 addTenantModal.addEventListener('show.bs.modal', function (event) {
-        console.log('Add tenant modal is opening');
-        populateAvailableRooms();
+    console.log('Add tenant modal is opening');
+    // โหลดข้อมูลผู้เช่าใหม่ก่อนที่จะ populate ห้องว่าง
+    fetch('/api/tenants')
+        .then(response => response.json())
+        .then(data => {
+            tenants = data;
+            populateAvailableRooms();
+        })
+        .catch(error => console.error('Error fetching tenants:', error));
 });
     
     Promise.all([fetchTenants(), fetchRooms()])
