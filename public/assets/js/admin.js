@@ -12,6 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     initializeMonthYearFilter();
     populatePaymentMonthSelect(); 
+
+    console.log('DOMContentLoaded event fired');
+    populateRoomSelect(); // เรียกใช้ทันทีเมื่อ DOM โหลดเสร็จ
         
 const addTenantModal = document.getElementById('addTenantModal');
 addTenantModal.addEventListener('show.bs.modal', function (event) {
