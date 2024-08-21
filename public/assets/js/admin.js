@@ -131,7 +131,7 @@ function fetchPayments() {
             return response.json();
         })
         .then(data => {
-            console.log('Received payments data:', data);
+            //console.log('Received payments data:', data);
             payments = data;
             displayPayments();
         })
