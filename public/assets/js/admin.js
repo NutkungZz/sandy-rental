@@ -13,13 +13,21 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMonthYearFilter();
     populatePaymentMonthSelect(); 
         
-    const addTenantModal = document.getElementById('addTenantModal');
-    addTenantModal.addEventListener('show.bs.modal', function (event) {
-        console.log('Add tenant modal is opening');
-        console.log('Rooms before populating:', rooms);
-        console.log('Tenants before populating:', tenants);
+const addTenantModal = document.getElementById('addTenantModal');
+addTenantModal.addEventListener('show.bs.modal', function (event) {
+    console.log('Add tenant modal is opening');
+    console.log('Rooms before populating:', rooms);
+    console.log('Tenants before populating:', tenants);
+    setTimeout(() => {
         populateRoomSelect();
-    });
+        // เพิ่ม event listener สำหรับ dropdown
+        const roomSelect = document.getElementById('addRoomId');
+        roomSelect.addEventListener('click', function() {
+            console.log('Dropdown clicked');
+            console.log('Current options:', Array.from(this.options).map(opt => opt.textContent));
+        });
+    }, 100);
+});
     
     Promise.all([fetchTenants(), fetchRooms()])
     .then(() => {
@@ -584,6 +592,11 @@ function populateRoomSelect() {
         
         console.log(`Populated ${availableRoomsCount} available rooms`);
         console.log('Final room select options:', Array.from(roomSelect.options).map(opt => opt.textContent));
+        
+        // เพิ่ม event listener สำหรับการเปลี่ยนแปลงค่า
+        roomSelect.addEventListener('change', function() {
+            console.log('Selected room:', this.value);
+        });
     } catch (error) {
         console.error('Error in populateRoomSelect:', error);
     }
