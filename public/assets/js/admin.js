@@ -13,20 +13,26 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMonthYearFilter();
     populatePaymentMonthSelect(); 
         
-    document.getElementById('addTenantModal').addEventListener('show.bs.modal', function (event) {
+    const addTenantModal = document.getElementById('addTenantModal');
+    addTenantModal.addEventListener('show.bs.modal', function (event) {
         console.log('Add tenant modal is opening');
-        populateRoomSelect();
+        try {
+            populateRoomSelect();
+        } catch (error) {
+            console.error('Error in populateRoomSelect:', error);
+        }
     });
     
     Promise.all([fetchTenants(), fetchRooms()])
-        .then(() => {
-            populateTenantSelect();
-            return fetchPayments();
-        })
-        .then(() => {
-            console.log('All data loaded successfully');
-        })
-        .catch(error => console.error('Error initializing data:', error));
+    .then(() => {
+        console.log('All data fetched, calling populateRoomSelect');
+        populateRoomSelect();
+        return fetchPayments();
+    })
+    .then(() => {
+        console.log('All data loaded successfully');
+    })
+    .catch(error => console.error('Error initializing data:', error));
 
     // Event listeners
     document.getElementById('logoutBtn').addEventListener('click', logout);
@@ -547,22 +553,38 @@ function handleAddPayment(e) {
 }
 
 function populateRoomSelect() {
-    console.log('Populating room select...');
-    const roomSelect = document.getElementById('addRoomId');
-    roomSelect.innerHTML = '<option value="">เลือกห้อง</option>';
-    
-    rooms.forEach(room => {
-        // ตรวจสอบว่าห้องนี้มีผู้เช่าหรือไม่
-        const hasTenant = tenants.some(tenant => tenant.room_id === room.id && tenant.move_out_date === null);
-        if (!hasTenant) {
-            const option = document.createElement('option');
-            option.value = room.id;
-            option.textContent = `ห้อง ${room.room_number}`;
-            roomSelect.appendChild(option);
+    console.log('Starting populateRoomSelect function');
+    try {
+        const roomSelect = document.getElementById('addRoomId');
+        if (!roomSelect) {
+            console.error('Room select element not found');
+            return;
         }
-    });
-    
-    console.log(`Populated ${roomSelect.options.length - 1} available rooms`);
+        
+        console.log('Clearing existing options');
+        roomSelect.innerHTML = '<option value="">เลือกห้อง</option>';
+        
+        console.log('Total rooms:', rooms.length);
+        console.log('Total tenants:', tenants.length);
+        
+        let availableRoomsCount = 0;
+        rooms.forEach(room => {
+            console.log('Checking room:', room.room_number);
+            const hasTenant = tenants.some(tenant => tenant.room_id === room.id && tenant.move_out_date === null);
+            if (!hasTenant) {
+                console.log('Room is available:', room.room_number);
+                const option = document.createElement('option');
+                option.value = room.id;
+                option.textContent = `ห้อง ${room.room_number}`;
+                roomSelect.appendChild(option);
+                availableRoomsCount++;
+            }
+        });
+        
+        console.log(`Populated ${availableRoomsCount} available rooms`);
+    } catch (error) {
+        console.error('Error in populateRoomSelect:', error);
+    }
 }
 
 function showAlert(title, message, icon) {
