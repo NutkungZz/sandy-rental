@@ -55,28 +55,28 @@ document.addEventListener('DOMContentLoaded', function() {
     fetchDashboardData();
 });
 
-function fetchTenants() {
-    return fetch('/api/tenants')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Fetched tenants:', data);
-            tenants = data;
-            displayTenants();
-            populateTenantSelect();
-        })
-        .catch(error => console.error('Error fetching tenants:', error));
-}
-
 function fetchRooms() {
     return fetch('/api/rooms')
         .then(response => response.json())
         .then(data => {
-            console.log('Fetched rooms:', data);
+            console.log('All rooms data:', JSON.stringify(data, null, 2));
             rooms = data;
             displayRooms();
-            populateRoomSelect();
+            return rooms;
         })
         .catch(error => console.error('Error fetching rooms:', error));
+}
+
+function fetchTenants() {
+    return fetch('/api/tenants')
+        .then(response => response.json())
+        .then(data => {
+            console.log('All tenants data:', JSON.stringify(data, null, 2));
+            tenants = data;
+            displayTenants();
+            return tenants;
+        })
+        .catch(error => console.error('Error fetching tenants:', error));
 }
 
 function initializeMonthYearFilter() {
