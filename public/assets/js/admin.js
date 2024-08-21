@@ -595,11 +595,6 @@ function populateRoomSelect() {
         
         console.log(`Populated ${availableRoomsCount} available rooms`);
         console.log('Final room select options:', Array.from(roomSelect.options).map(opt => opt.textContent));
-        
-        // เพิ่ม event listener สำหรับการเปลี่ยนแปลงค่า
-        roomSelect.addEventListener('change', function() {
-            console.log('Selected room:', this.value);
-        });
     } catch (error) {
         console.error('Error in populateRoomSelect:', error);
     }
