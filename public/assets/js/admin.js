@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .then(() => {
         console.log('All data loaded successfully');
+        populateRoomSelect(); // เรียกใช้อีกครั้งหลังจากโหลดข้อมูลทั้งหมด
     })
     .catch(error => console.error('Error initializing data:', error));
 
