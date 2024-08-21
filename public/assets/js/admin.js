@@ -600,6 +600,32 @@ function populateRoomSelect() {
     }
 }
 
+function populateAvailableRooms() {
+    console.log('Populating available rooms');
+    const roomSelect = document.getElementById('addRoomId');
+    roomSelect.innerHTML = '<option value="">เลือกห้อง</option>';
+
+    // ใช้ API ที่มีอยู่เดิมเพื่อดึงข้อมูลห้องทั้งหมด
+    fetch('/api/rooms')
+        .then(response => response.json())
+        .then(allRooms => {
+            console.log('All rooms:', allRooms);
+            
+            // กรองเฉพาะห้องที่ว่าง
+            const availableRooms = allRooms.filter(room => !room.tenant_id);
+            console.log('Available rooms:', availableRooms);
+
+            availableRooms.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.id;
+                option.textContent = `ห้อง ${room.room_number}`;
+                roomSelect.appendChild(option);
+            });
+            console.log('Room options populated:', roomSelect.options.length);
+        })
+        .catch(error => console.error('Error fetching rooms:', error));
+}
+
 function showAlert(title, message, icon) {
     Swal.fire({
         title: title,
