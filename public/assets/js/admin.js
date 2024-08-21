@@ -16,11 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const addTenantModal = document.getElementById('addTenantModal');
     addTenantModal.addEventListener('show.bs.modal', function (event) {
         console.log('Add tenant modal is opening');
-        try {
-            populateRoomSelect();
-        } catch (error) {
-            console.error('Error in populateRoomSelect:', error);
-        }
+        console.log('Rooms before populating:', rooms);
+        console.log('Tenants before populating:', tenants);
+        populateRoomSelect();
     });
     
     Promise.all([fetchTenants(), fetchRooms()])
@@ -569,8 +567,11 @@ function populateRoomSelect() {
         
         let availableRoomsCount = 0;
         rooms.forEach(room => {
-            console.log('Checking room:', room.room_number);
-            const hasTenant = tenants.some(tenant => tenant.room_id === room.id && tenant.move_out_date === null);
+            console.log('Checking room:', room.room_number, 'ID:', room.id);
+            const hasTenant = tenants.some(tenant => {
+                console.log('Comparing tenant:', tenant.name, 'Room ID:', tenant.room_id, 'Move out date:', tenant.move_out_date);
+                return tenant.room_id === room.id && tenant.move_out_date === null;
+            });
             if (!hasTenant) {
                 console.log('Room is available:', room.room_number);
                 const option = document.createElement('option');
@@ -578,10 +579,13 @@ function populateRoomSelect() {
                 option.textContent = `ห้อง ${room.room_number}`;
                 roomSelect.appendChild(option);
                 availableRoomsCount++;
+            } else {
+                console.log('Room is occupied:', room.room_number);
             }
         });
         
         console.log(`Populated ${availableRoomsCount} available rooms`);
+        console.log('Final room select options:', Array.from(roomSelect.options).map(opt => opt.textContent));
     } catch (error) {
         console.error('Error in populateRoomSelect:', error);
     }
