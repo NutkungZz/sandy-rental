@@ -551,7 +551,7 @@ function handleAddPayment(e) {
 }
 
 function populateRoomSelect() {
-    console.log('Starting populateRoomSelect function');
+    console.log('populateRoomSelect function called');
     try {
         const roomSelect = document.getElementById('addRoomId');
         if (!roomSelect) {
@@ -568,10 +568,7 @@ function populateRoomSelect() {
         let availableRoomsCount = 0;
         rooms.forEach(room => {
             console.log('Checking room:', room.room_number, 'ID:', room.id);
-            const hasTenant = tenants.some(tenant => {
-                console.log('Comparing tenant:', tenant.name, 'Room ID:', tenant.room_id, 'Move out date:', tenant.move_out_date);
-                return tenant.room_id === room.id && tenant.move_out_date === null;
-            });
+            const hasTenant = tenants.some(tenant => tenant.room_id === room.id && tenant.move_out_date === null);
             if (!hasTenant) {
                 console.log('Room is available:', room.room_number);
                 const option = document.createElement('option');
