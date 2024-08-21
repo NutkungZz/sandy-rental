@@ -606,7 +606,7 @@ function populateAvailableRooms() {
     fetch('/api/rooms')
         .then(response => response.json())
         .then(allRooms => {
-            console.log('All rooms:', allRooms);
+            //console.log('All rooms:', allRooms);
             
             // กรองเฉพาะห้องที่ไม่มีผู้เช่า
             const availableRooms = allRooms.filter(room => {
@@ -615,7 +615,7 @@ function populateAvailableRooms() {
                     tenant.room_id === room.id && tenant.move_out_date === null
                 );
             });
-            console.log('Available rooms:', availableRooms);
+            //console.log('Available rooms:', availableRooms);
 
             availableRooms.forEach(room => {
                 const option = document.createElement('option');
@@ -623,7 +623,7 @@ function populateAvailableRooms() {
                 option.textContent = `ห้อง ${room.room_number}`;
                 roomSelect.appendChild(option);
             });
-            console.log('Room options populated:', roomSelect.options.length);
+            //console.log('Room options populated:', roomSelect.options.length);
         })
         .catch(error => console.error('Error fetching rooms:', error));
 }
